@@ -7,7 +7,7 @@
   <title>Pro ASCII Art Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&family=Bangers&family=Creepster&family=VT323&family=Dancing+Script&display=swap"
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&family=Bangers&family=Creepster&family=VT323&family=Dancing+Script&family=Press+Start+2P&family=Lobster&family=Orbitron&family=Pacifico&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -268,7 +268,7 @@
         </svg>
       </button>
       <a href="https://github.com" target="_blank"
-        class="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)]">v2.0.0</a>
+        class="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)]">v2.1.0</a>
     </div>
   </header>
 
@@ -306,7 +306,7 @@
         <!-- Camera -->
         <div id="panelCamera" class="hidden">
           <div class="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-            <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+            <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
             <div id="camPlaceholder"
               class="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] text-sm">Camera off
             </div>
@@ -316,11 +316,26 @@
 
         <!-- Video Upload -->
         <div id="panelVideo" class="hidden">
-          <label class="drop-zone flex flex-col items-center justify-center p-8 cursor-pointer h-40 mb-2">
+          <label class="drop-zone flex flex-col items-center justify-center p-8 cursor-pointer h-32 mb-2">
             <span class="text-sm text-[var(--text-secondary)]">Drop video file</span>
             <input type="file" id="videoInput" accept="video/*" class="hidden" />
           </label>
-          <video id="uploadedVideo" controls class="w-full rounded-lg hidden bg-black max-h-40"></video>
+          <!-- Hidden Video Element -->
+          <video id="uploadedVideo" class="hidden" playsinline></video>
+
+          <!-- Custom Video Controls -->
+          <div id="videoControls" class="control-group flex flex-col gap-2 hidden">
+            <div class="flex items-center justify-between">
+              <button id="btnVidToggle" class="btn btn-primary text-xs py-1 px-2">Play</button>
+              <span id="vidTime" class="text-[10px] font-mono text-[var(--text-secondary)]">00:00 / 00:00</span>
+            </div>
+            <input type="range" id="vidProgress" min="0" max="100" value="0" class="input-range">
+            <div class="flex items-center gap-2">
+              <button id="btnVidMute"
+                class="text-xs font-mono text-[var(--text-secondary)] hover:text-white">Mute</button>
+              <input type="range" id="vidVolume" min="0" max="1" step="0.1" value="1" class="input-range w-20">
+            </div>
+          </div>
         </div>
 
         <!-- Text Input -->
@@ -338,6 +353,10 @@
                 <option value="Creepster">Creepster (Scary)</option>
                 <option value="VT323">VT323 (Retro)</option>
                 <option value="Dancing Script">Script (Cursive)</option>
+                <option value="Press Start 2P">Press Start 2P (8-bit)</option>
+                <option value="Lobster">Lobster (Bold)</option>
+                <option value="Orbitron">Orbitron (Sci-Fi)</option>
+                <option value="Pacifico">Pacifico (Brush)</option>
               </select>
             </div>
             <div>
@@ -349,12 +368,12 @@
       </section>
 
       <!-- Settings -->
-      <section>
+      <section id="secConfig">
         <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Configuration</h2>
 
         <div class="control-group flex flex-col gap-4">
           <!-- Resolution -->
-          <div>
+          <div id="grpResolution">
             <div class="flex justify-between mb-1">
               <label class="text-xs font-medium">Resolution (Block Size)</label>
               <span id="valRes" class="text-xs font-mono text-[var(--text-secondary)]">6px</span>
@@ -363,7 +382,7 @@
           </div>
 
           <!-- Char Set -->
-          <div>
+          <div id="grpCharSet">
             <label class="text-xs font-medium mb-1 block">Character Set</label>
             <select id="selCharSet" class="select-input text-sm">
               <option value="ultra">Ultra Detailed</option>
@@ -377,6 +396,9 @@
               <option value="smileys">Smileys</option>
               <option value="geometric">Geometric</option>
               <option value="arrows">Arrows</option>
+              <option value="braille">Braille</option>
+              <option value="morse">Morse</option>
+              <option value="katakana">Katakana</option>
               <option value="custom">Custom</option>
             </select>
             <div id="charPreview"
@@ -387,7 +409,7 @@
           </div>
 
           <!-- Invert -->
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between" id="grpInvert">
             <label class="text-xs font-medium">Invert Characters</label>
             <input type="checkbox" id="chkInvert" class="w-4 h-4 rounded border-[var(--border)]">
           </div>
@@ -395,7 +417,7 @@
       </section>
 
       <!-- Filters -->
-      <section>
+      <section id="secFilters">
         <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Filters</h2>
         <div class="control-group flex flex-col gap-4">
           <div>
@@ -425,6 +447,21 @@
               <span id="valSepia" class="text-xs font-mono text-[var(--text-secondary)]">0%</span>
             </div>
             <input type="range" id="inpSepia" min="0" max="100" value="0" class="input-range">
+          </div>
+          <!-- New Filters -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Blur</label>
+              <span id="valBlur" class="text-xs font-mono text-[var(--text-secondary)]">0px</span>
+            </div>
+            <input type="range" id="inpBlur" min="0" max="10" value="0" class="input-range">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Hue Rotate</label>
+              <span id="valHue" class="text-xs font-mono text-[var(--text-secondary)]">0°</span>
+            </div>
+            <input type="range" id="inpHue" min="0" max="360" value="0" class="input-range">
           </div>
         </div>
       </section>
@@ -503,10 +540,35 @@
   <script id="workerScript" type="javascript/worker">
     self.onmessage = function(e) {
       const { imageData, width, height, options } = e.data;
-      const { resolution, chars, invert, contrast, brightness, saturation, sepia, colorMode } = options;
+      const { resolution, chars, invert, contrast, brightness, saturation, sepia, hue, colorMode } = options;
       
       // Helper to adjust color
-      function adjustColor(r, g, b, contrast, brightness, saturation, sepia) {
+      function adjustColor(r, g, b, contrast, brightness, saturation, sepia, hue) {
+        // Hue Rotate
+        if (hue !== 0) {
+          const angle = hue * Math.PI / 180;
+          const cosA = Math.cos(angle);
+          const sinA = Math.sin(angle);
+          const sqrt1_3 = 0.57735;
+          
+          // Matrix approximation for hue rotation
+          const m00 = cosA + (1.0 - cosA) / 3.0;
+          const m01 = 1.0/3.0 * (1.0 - cosA) - sqrt1_3 * sinA;
+          const m02 = 1.0/3.0 * (1.0 - cosA) + sqrt1_3 * sinA;
+          const m10 = 1.0/3.0 * (1.0 - cosA) + sqrt1_3 * sinA;
+          const m11 = cosA + 1.0/3.0*(1.0 - cosA);
+          const m12 = 1.0/3.0 * (1.0 - cosA) - sqrt1_3 * sinA;
+          const m20 = 1.0/3.0 * (1.0 - cosA) - sqrt1_3 * sinA;
+          const m21 = 1.0/3.0 * (1.0 - cosA) + sqrt1_3 * sinA;
+          const m22 = cosA + 1.0/3.0 * (1.0 - cosA);
+
+          const rx = r * m00 + g * m01 + b * m02;
+          const gx = r * m10 + g * m11 + b * m12;
+          const bx = r * m20 + g * m21 + b * m22;
+          
+          r = rx; g = gx; b = bx;
+        }
+
         // Saturation
         if (saturation !== 100) {
           const satMult = saturation / 100;
@@ -577,7 +639,7 @@
           }
 
           // Apply filters
-          [r, g, b] = adjustColor(r, g, b, contrast, brightness, saturation, sepia);
+          [r, g, b] = adjustColor(r, g, b, contrast, brightness, saturation, sepia, hue);
           
           const gray = 0.299 * r + 0.587 * g + 0.114 * b;
           let charIdx = Math.floor((gray / 255) * (chars.length - 1));
@@ -614,6 +676,8 @@
       brightness: 0,
       saturation: 100,
       sepia: 0,
+      blur: 0,
+      hue: 0,
       color: true,
       zoom: 1,
       isPlaying: false,
@@ -636,6 +700,9 @@
       smileys: " ☺☻",
       geometric: " ○◔◑◕●",
       arrows: " ↑↗→↘↓↙←↖",
+      braille: " ⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿",
+      morse: " .-",
+      katakana: " アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン",
     };
 
     // DOM Elements
@@ -668,7 +735,19 @@
       valSaturation: document.getElementById('valSaturation'),
       inpSepia: document.getElementById('inpSepia'),
       valSepia: document.getElementById('valSepia'),
+      inpBlur: document.getElementById('inpBlur'),
+      valBlur: document.getElementById('valBlur'),
+      inpHue: document.getElementById('inpHue'),
+      valHue: document.getElementById('valHue'),
       chkColor: document.getElementById('chkColor'),
+
+      // Video Controls
+      videoControls: document.getElementById('videoControls'),
+      btnVidToggle: document.getElementById('btnVidToggle'),
+      vidProgress: document.getElementById('vidProgress'),
+      vidTime: document.getElementById('vidTime'),
+      btnVidMute: document.getElementById('btnVidMute'),
+      vidVolume: document.getElementById('vidVolume'),
 
       // Tabs
       tabImage: document.getElementById('tabImage'),
@@ -693,6 +772,7 @@
     const worker = new Worker(URL.createObjectURL(workerBlob));
 
     let currentImage = null; // Image object or Video element
+    let lastLoadedImage = null;
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d', { willReadFrequently: true });
     let isGenerating = false;
@@ -757,6 +837,18 @@
         triggerGenerate();
       });
 
+      els.inpBlur.addEventListener('input', e => {
+        state.blur = parseInt(e.target.value);
+        els.valBlur.textContent = state.blur + 'px';
+        triggerGenerate();
+      });
+
+      els.inpHue.addEventListener('input', e => {
+        state.hue = parseInt(e.target.value);
+        els.valHue.textContent = state.hue + '°';
+        triggerGenerate();
+      });
+
       els.chkColor.addEventListener('change', e => {
         state.color = e.target.checked;
         triggerGenerate();
@@ -778,7 +870,7 @@
 
       // Zoom
       document.getElementById('zoomIn').addEventListener('click', () => {
-        state.zoom = Math.min(5, state.zoom + 0.1);
+        state.zoom = Math.min(10, state.zoom + 0.1);
         updateZoom();
       });
       document.getElementById('zoomOut').addEventListener('click', () => {
@@ -804,6 +896,50 @@
       // Video Upload
       els.videoInput.addEventListener('change', e => handleVideoFile(e.target.files[0]));
       document.querySelector('#panelVideo .drop-zone').addEventListener('click', () => els.videoInput.click());
+
+      // Video Controls Events
+      els.btnVidToggle.addEventListener('click', () => {
+        if (els.uploadedVideo.paused) {
+          els.uploadedVideo.play();
+          els.btnVidToggle.textContent = 'Pause';
+        } else {
+          els.uploadedVideo.pause();
+          els.btnVidToggle.textContent = 'Play';
+        }
+      });
+
+      els.vidProgress.addEventListener('input', e => {
+        const time = (e.target.value / 100) * els.uploadedVideo.duration;
+        els.uploadedVideo.currentTime = time;
+      });
+
+      els.btnVidMute.addEventListener('click', () => {
+        els.uploadedVideo.muted = !els.uploadedVideo.muted;
+        els.btnVidMute.textContent = els.uploadedVideo.muted ? 'Unmute' : 'Mute';
+      });
+
+      els.vidVolume.addEventListener('input', e => {
+        els.uploadedVideo.volume = e.target.value;
+      });
+
+      els.uploadedVideo.addEventListener('timeupdate', () => {
+        if (!els.uploadedVideo.duration) return;
+        const pct = (els.uploadedVideo.currentTime / els.uploadedVideo.duration) * 100;
+        els.vidProgress.value = pct;
+
+        const cur = formatTime(els.uploadedVideo.currentTime);
+        const dur = formatTime(els.uploadedVideo.duration);
+        els.vidTime.textContent = `${cur} / ${dur}`;
+      });
+
+      els.uploadedVideo.addEventListener('ended', () => {
+        els.btnVidToggle.textContent = 'Play';
+      });
+
+      // Ensure loop starts if video plays (e.g. via controls)
+      els.uploadedVideo.addEventListener('play', () => {
+        if (!isGenerating) processFrame();
+      });
 
       // Camera
       document.getElementById('btnToggleCam').addEventListener('click', toggleCamera);
@@ -860,8 +996,17 @@
           stopMedia();
           state.source = t.toLowerCase();
 
-          if (state.source === 'image' && currentImage instanceof Image) {
-            triggerGenerate();
+          // Restore currentImage based on source
+          if (state.source === 'image') {
+            currentImage = lastLoadedImage;
+            if (currentImage) triggerGenerate();
+          } else if (state.source === 'video') {
+            currentImage = els.uploadedVideo;
+            // Don't auto-play, but trigger once to show frame if loaded
+            if (els.uploadedVideo.readyState >= 2) triggerGenerate();
+          } else if (state.source === 'camera') {
+            currentImage = els.webcamVideo;
+            // Camera needs explicit start
           } else if (state.source === 'text') {
             triggerGenerate();
           }
@@ -878,6 +1023,7 @@
       reader.onload = e => {
         const img = new Image();
         img.onload = () => {
+          lastLoadedImage = img;
           currentImage = img;
           triggerGenerate();
         };
@@ -891,11 +1037,21 @@
 
       const url = URL.createObjectURL(file);
       els.uploadedVideo.src = url;
-      els.uploadedVideo.classList.remove('hidden');
+      // Don't show the video element, just show controls
+      els.videoControls.classList.remove('hidden');
       currentImage = els.uploadedVideo;
 
-      els.uploadedVideo.play();
+      els.uploadedVideo.play().then(() => {
+        els.btnVidToggle.textContent = 'Pause';
+      }).catch(e => console.error(e));
+
       processFrame();
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return `${m}:${sec.toString().padStart(2, '0')}`;
     }
 
     async function toggleCamera() {
@@ -927,6 +1083,7 @@
       }
       if (els.uploadedVideo.src) {
         els.uploadedVideo.pause();
+        els.btnVidToggle.textContent = 'Play';
       }
       state.rafId = null;
     }
@@ -950,6 +1107,9 @@
 
       // Draw to canvas
       let w, h;
+
+      // Apply Blur (Canvas API)
+      ctx.filter = state.blur > 0 ? `blur(${state.blur}px)` : 'none';
 
       if (state.source === 'text') {
         // Render text to temp canvas
@@ -1015,6 +1175,7 @@
         brightness: state.brightness,
         saturation: state.saturation,
         sepia: state.sepia,
+        hue: state.hue,
         colorMode: state.color
       };
 
