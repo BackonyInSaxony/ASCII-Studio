@@ -1,9 +1,9 @@
 # ASCII Studio
 
-A clean little tool that turns images, videos, and your webcam into ASCII art. Drop a file, flip on the camera, tweak some sliders, boom. ASCII.
+A clean little tool that turns images, videos, text, andyour webcam into ASCII art. Drop a file, flip on the camera, tweak some sliders, boom. ASCII.
 
 ## What it does
-- Converts images, videos, and live camera feed  
+- Converts images, videos, text, and live camera feed
 - Custom character sets  
 - Contrast, brightness, saturation, sepia  
 - Color or monochrome  
