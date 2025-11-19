@@ -4,10 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ASCII Studio</title>
+  <title>Pro ASCII Art Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&family=Bangers&family=Creepster&family=VT323&family=Dancing+Script&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -258,7 +258,7 @@
       <div
         class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold font-mono">
         A</div>
-      <h1 class="text-xl font-bold tracking-tight">ASCII Studio</h1>
+      <h1 class="text-xl font-bold tracking-tight">Pro ASCII Studio</h1>
     </div>
     <div class="flex items-center gap-3">
       <button id="themeToggle" class="p-2 rounded-full hover:bg-[var(--bg-tertiary)] transition" title="Toggle Theme">
@@ -283,9 +283,10 @@
       <section>
         <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Input Source</h2>
         <div class="flex gap-2 mb-3">
-          <button id="tabImage" class="flex-1 btn btn-primary text-xs">Image</button>
-          <button id="tabCamera" class="flex-1 btn btn-secondary text-xs">Camera</button>
-          <button id="tabVideo" class="flex-1 btn btn-secondary text-xs">Video</button>
+          <button id="tabImage" class="flex-1 btn btn-primary text-xs" title="Convert Image">Image</button>
+          <button id="tabCamera" class="flex-1 btn btn-secondary text-xs" title="Use Webcam">Camera</button>
+          <button id="tabVideo" class="flex-1 btn btn-secondary text-xs" title="Convert Video">Video</button>
+          <button id="tabText" class="flex-1 btn btn-secondary text-xs" title="Type Text">Text</button>
         </div>
 
         <!-- Image Upload -->
@@ -320,6 +321,30 @@
             <input type="file" id="videoInput" accept="video/*" class="hidden" />
           </label>
           <video id="uploadedVideo" controls class="w-full rounded-lg hidden bg-black max-h-40"></video>
+        </div>
+
+        <!-- Text Input -->
+        <div id="panelText" class="hidden flex flex-col gap-3">
+          <textarea id="inpText" class="select-input h-24 font-mono text-sm resize-none"
+            placeholder="Type something..."></textarea>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-medium mb-1 block">Font</label>
+              <select id="selFont" class="select-input text-xs">
+                <option value="Inter">Inter (Clean)</option>
+                <option value="JetBrains Mono">Mono (Code)</option>
+                <option value="Bangers">Bangers (Comic)</option>
+                <option value="Creepster">Creepster (Scary)</option>
+                <option value="VT323">VT323 (Retro)</option>
+                <option value="Dancing Script">Script (Cursive)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-medium mb-1 block">Size</label>
+              <input type="number" id="inpFontSize" value="60" min="10" max="200" class="select-input text-xs">
+            </div>
+          </div>
         </div>
       </section>
 
@@ -408,10 +433,16 @@
       <section class="mt-auto">
         <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Export</h2>
         <div class="grid grid-cols-2 gap-2">
-          <button id="btnCopy" class="btn btn-secondary justify-center text-xs">Copy Text</button>
-          <button id="btnDownloadTxt" class="btn btn-secondary justify-center text-xs">Save .txt</button>
-          <button id="btnDownloadHtml" class="btn btn-secondary justify-center text-xs">Save HTML</button>
-          <button id="btnDownloadPng" class="btn btn-secondary justify-center text-xs">Save PNG</button>
+          <button id="btnCopy" class="btn btn-secondary justify-center text-xs" title="Copy to Clipboard">Copy
+            Text</button>
+          <button id="btnDownloadTxt" class="btn btn-secondary justify-center text-xs" title="Download .txt">Save
+            .txt</button>
+          <button id="btnDownloadHtml" class="btn btn-secondary justify-center text-xs" title="Download HTML">Save
+            HTML</button>
+          <button id="btnDownloadPng" class="btn btn-secondary justify-center text-xs" title="Download PNG">Save
+            PNG</button>
+        </div>
+        <div id="statusBar" class="mt-4 text-[10px] font-mono text-[var(--text-secondary)] text-center opacity-50">Ready
         </div>
       </section>
     </aside>
@@ -586,7 +617,11 @@
       color: true,
       zoom: 1,
       isPlaying: false,
-      rafId: null
+      rafId: null,
+      // Text Mode
+      text: '',
+      fontFamily: 'Inter',
+      fontSize: 60
     };
 
     const charSets = {
@@ -639,9 +674,18 @@
       tabImage: document.getElementById('tabImage'),
       tabCamera: document.getElementById('tabCamera'),
       tabVideo: document.getElementById('tabVideo'),
+      tabText: document.getElementById('tabText'),
       panelImage: document.getElementById('panelImage'),
       panelCamera: document.getElementById('panelCamera'),
       panelVideo: document.getElementById('panelVideo'),
+      panelText: document.getElementById('panelText'),
+
+      // Text Inputs
+      inpText: document.getElementById('inpText'),
+      selFont: document.getElementById('selFont'),
+      inpFontSize: document.getElementById('inpFontSize'),
+
+      statusBar: document.getElementById('statusBar')
     };
 
     // Worker Setup
@@ -718,6 +762,20 @@
         triggerGenerate();
       });
 
+      // Text Mode Listeners
+      els.inpText.addEventListener('input', e => {
+        state.text = e.target.value;
+        triggerGenerate();
+      });
+      els.selFont.addEventListener('change', e => {
+        state.fontFamily = e.target.value;
+        triggerGenerate();
+      });
+      els.inpFontSize.addEventListener('input', e => {
+        state.fontSize = parseInt(e.target.value);
+        triggerGenerate();
+      });
+
       // Zoom
       document.getElementById('zoomIn').addEventListener('click', () => {
         state.zoom = Math.min(5, state.zoom + 0.1);
@@ -763,6 +821,7 @@
         if (state.source === 'video' || state.source === 'camera') {
           requestAnimationFrame(processFrame);
         }
+        updateStatus('Ready');
       };
 
       // Theme
@@ -785,7 +844,7 @@
     }
 
     function setupTabs() {
-      const tabs = ['Image', 'Camera', 'Video'];
+      const tabs = ['Image', 'Camera', 'Video', 'Text'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab${t}`);
         btn.addEventListener('click', () => {
@@ -802,6 +861,8 @@
           state.source = t.toLowerCase();
 
           if (state.source === 'image' && currentImage instanceof Image) {
+            triggerGenerate();
+          } else if (state.source === 'text') {
             triggerGenerate();
           }
         });
@@ -871,6 +932,10 @@
     }
 
     function triggerGenerate() {
+      if (state.source === 'text') {
+        processFrame();
+        return;
+      }
       if (!currentImage) return;
       if (state.source === 'image') {
         processFrame();
@@ -878,24 +943,66 @@
     }
 
     function processFrame() {
-      if (!currentImage) return;
-      if (isGenerating && state.source !== 'image') return; // Skip frame if busy
+      if (state.source !== 'text' && !currentImage) return;
+      if (isGenerating && state.source !== 'image' && state.source !== 'text') return; // Skip frame if busy
+
+      updateStatus('Processing...');
 
       // Draw to canvas
-      const w = currentImage.videoWidth || currentImage.width;
-      const h = currentImage.videoHeight || currentImage.height;
+      let w, h;
 
-      if (!w || !h) {
-        if (state.source !== 'image') requestAnimationFrame(processFrame);
-        return;
+      if (state.source === 'text') {
+        // Render text to temp canvas
+        const textCanvas = document.createElement('canvas');
+        const tCtx = textCanvas.getContext('2d');
+
+        // Measure
+        tCtx.font = `${state.fontSize}px "${state.fontFamily}"`;
+        const lines = state.text.split('\n');
+        const lineHeight = state.fontSize * 1.2;
+        const maxLineWidth = lines.reduce((max, line) => Math.max(max, tCtx.measureText(line).width), 0);
+
+        w = Math.max(200, maxLineWidth + 40);
+        h = Math.max(100, (lines.length * lineHeight) + 40);
+
+        textCanvas.width = w;
+        textCanvas.height = h;
+
+        // Draw
+        tCtx.fillStyle = '#ffffff'; // White bg
+        tCtx.fillRect(0, 0, w, h);
+        tCtx.fillStyle = '#000000'; // Black text
+        tCtx.font = `${state.fontSize}px "${state.fontFamily}"`;
+        tCtx.textBaseline = 'top';
+
+        lines.forEach((line, i) => {
+          tCtx.fillText(line, 20, 20 + (i * lineHeight));
+        });
+
+        // Copy to main canvas
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+        ctx.drawImage(textCanvas, 0, 0);
+
+      } else {
+        w = currentImage.videoWidth || currentImage.width;
+        h = currentImage.videoHeight || currentImage.height;
+
+        if (!w || !h) {
+          if (state.source !== 'image') requestAnimationFrame(processFrame);
+          return;
+        }
+
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+
+        ctx.drawImage(currentImage, 0, 0, w, h);
       }
 
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
-
-      ctx.drawImage(currentImage, 0, 0, w, h);
       const imageData = ctx.getImageData(0, 0, w, h);
 
       // Prepare options
@@ -934,6 +1041,11 @@
     function updateZoom() {
       document.getElementById('zoomVal').textContent = Math.round(state.zoom * 100) + '%';
       els.outputWrapper.style.transform = `scale(${state.zoom})`;
+    }
+
+    function updateStatus(msg) {
+      els.statusBar.textContent = msg;
+      els.statusBar.style.opacity = msg === 'Ready' ? '0.5' : '1';
     }
 
     function showToast(msg, type = 'success') {
