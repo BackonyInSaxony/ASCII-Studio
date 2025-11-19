@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ASCII Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #09090b;
+      --bg-secondary: #18181b;
+      --bg-tertiary: #27272a;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --border: #3f3f46;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f4f4f5;
+      --bg-tertiary: #e4e4e7;
+      --text-primary: #18181b;
+      --text-secondary: #52525b;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --border: #d4d4d8;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    /* Glassmorphism & UI Components */
+    .glass-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .control-group {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .control-group:hover {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .input-range {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-primary);
+      border-radius: 3px;
+      appearance: none;
+      outline: none;
+    }
+
+    .input-range::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .input-range::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .select-input {
+      width: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      outline: none;
+    }
+
+    .select-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 1rem;
+      transition: all 0.2s;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .drop-zone:hover,
+    .drop-zone.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    /* ASCII Output */
+    #asciiOutput {
+      font-size: 10px;
+      line-height: 0.85;
+      /* Adjust based on font */
+      overflow: auto;
+      white-space: pre;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error);
+    }
+
+    /* Loading Overlay */
+    .loader {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top: 3px solid var(--accent);
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 1024px) {
+      .main-layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100% !important;
+      }
+
+      .output-area {
+        height: 60vh !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="h-screen w-screen overflow-hidden flex flex-col">
+
+  <!-- Header -->
+  <header
+    class="h-16 border-b border-[var(--border)] bg-[var(--bg-secondary)] flex items-center justify-between px-6 shrink-0 z-10">
+    <div class="flex items-center gap-3">
+      <div
+        class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold font-mono">
+        A</div>
+      <h1 class="text-xl font-bold tracking-tight">ASCII Studio</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" class="p-2 rounded-full hover:bg-[var(--bg-tertiary)] transition" title="Toggle Theme">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+      </button>
+      <a href="https://github.com" target="_blank"
+        class="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)]">v2.0.0</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex main-layout overflow-hidden">
+
+    <!-- Sidebar Controls -->
+    <aside
+      class="sidebar w-[400px] bg-[var(--bg-primary)] border-r border-[var(--border)] flex flex-col overflow-y-auto p-6 gap-6 shrink-0">
+
+      <!-- Input Section -->
+      <section>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Input Source</h2>
+        <div class="flex gap-2 mb-3">
+          <button id="tabImage" class="flex-1 btn btn-primary text-xs">Image</button>
+          <button id="tabCamera" class="flex-1 btn btn-secondary text-xs">Camera</button>
+          <button id="tabVideo" class="flex-1 btn btn-secondary text-xs">Video</button>
+        </div>
+
+        <!-- Image Upload -->
+        <div id="panelImage" class="block">
+          <label id="dropZone" class="drop-zone flex flex-col items-center justify-center p-8 cursor-pointer h-40">
+            <svg class="w-8 h-8 text-[var(--text-secondary)] mb-2" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+            <span class="text-sm text-[var(--text-secondary)]">Drop image or click</span>
+            <input type="file" id="fileInput" accept="image/*" class="hidden" />
+          </label>
+        </div>
+
+        <!-- Camera -->
+        <div id="panelCamera" class="hidden">
+          <div class="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
+            <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+            <div id="camPlaceholder"
+              class="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] text-sm">Camera off
+            </div>
+          </div>
+          <button id="btnToggleCam" class="btn btn-secondary w-full justify-center">Start Camera</button>
+        </div>
+
+        <!-- Video Upload -->
+        <div id="panelVideo" class="hidden">
+          <label class="drop-zone flex flex-col items-center justify-center p-8 cursor-pointer h-40 mb-2">
+            <span class="text-sm text-[var(--text-secondary)]">Drop video file</span>
+            <input type="file" id="videoInput" accept="video/*" class="hidden" />
+          </label>
+          <video id="uploadedVideo" controls class="w-full rounded-lg hidden bg-black max-h-40"></video>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Configuration</h2>
+
+        <div class="control-group flex flex-col gap-4">
+          <!-- Resolution -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Resolution (Block Size)</label>
+              <span id="valRes" class="text-xs font-mono text-[var(--text-secondary)]">6px</span>
+            </div>
+            <input type="range" id="inpRes" min="1" max="20" value="6" class="input-range">
+          </div>
+
+          <!-- Char Set -->
+          <div>
+            <label class="text-xs font-medium mb-1 block">Character Set</label>
+            <select id="selCharSet" class="select-input text-sm">
+              <option value="ultra">Ultra Detailed</option>
+              <option value="standard" selected>Standard</option>
+              <option value="simple">Simple</option>
+              <option value="numbers">Numbers</option>
+              <option value="letters">Letters</option>
+              <option value="blocks">Blocks</option>
+              <option value="binary">Binary</option>
+              <option value="matrix">Matrix</option>
+              <option value="smileys">Smileys</option>
+              <option value="geometric">Geometric</option>
+              <option value="arrows">Arrows</option>
+              <option value="custom">Custom</option>
+            </select>
+            <div id="charPreview"
+              class="mt-2 p-2 bg-[var(--bg-primary)] rounded text-[10px] font-mono break-all text-[var(--text-secondary)] border border-[var(--border)]">
+            </div>
+            <input id="inpCustomChars" type="text" class="select-input mt-2 hidden text-sm font-mono"
+              placeholder="Enter chars..." />
+          </div>
+
+          <!-- Invert -->
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium">Invert Characters</label>
+            <input type="checkbox" id="chkInvert" class="w-4 h-4 rounded border-[var(--border)]">
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Filters</h2>
+        <div class="control-group flex flex-col gap-4">
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Contrast</label>
+              <span id="valContrast" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
+            </div>
+            <input type="range" id="inpContrast" min="-100" max="100" value="0" class="input-range">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Brightness</label>
+              <span id="valBrightness" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
+            </div>
+            <input type="range" id="inpBrightness" min="-100" max="100" value="0" class="input-range">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Saturation</label>
+              <span id="valSaturation" class="text-xs font-mono text-[var(--text-secondary)]">100%</span>
+            </div>
+            <input type="range" id="inpSaturation" min="0" max="200" value="100" class="input-range">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-xs font-medium">Sepia</label>
+              <span id="valSepia" class="text-xs font-mono text-[var(--text-secondary)]">0%</span>
+            </div>
+            <input type="range" id="inpSepia" min="0" max="100" value="0" class="input-range">
+          </div>
+        </div>
+      </section>
+
+      <!-- Export -->
+      <section class="mt-auto">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Export</h2>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnCopy" class="btn btn-secondary justify-center text-xs">Copy Text</button>
+          <button id="btnDownloadTxt" class="btn btn-secondary justify-center text-xs">Save .txt</button>
+          <button id="btnDownloadHtml" class="btn btn-secondary justify-center text-xs">Save HTML</button>
+          <button id="btnDownloadPng" class="btn btn-secondary justify-center text-xs">Save PNG</button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Output Area -->
+    <section class="output-area flex-1 bg-[var(--bg-secondary)] relative flex flex-col min-w-0">
+      <!-- Toolbar -->
+      <div class="h-10 border-b border-[var(--border)] flex items-center px-4 justify-between bg-[var(--bg-tertiary)]">
+        <div class="flex items-center gap-4">
+          <span id="statDims" class="text-xs font-mono text-[var(--text-secondary)]">0 x 0</span>
+          <span id="statFps" class="text-xs font-mono text-[var(--text-secondary)] hidden">0 FPS</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-xs cursor-pointer">
+            <input type="checkbox" id="chkColor" checked class="rounded border-[var(--border)]">
+            <span>Color</span>
+          </label>
+          <div class="h-4 w-px bg-[var(--border)] mx-1"></div>
+          <div class="flex gap-1">
+            <button id="zoomOut" class="p-1 hover:bg-[var(--bg-primary)] rounded" title="Zoom Out">-</button>
+            <span id="zoomVal" class="text-xs font-mono self-center w-8 text-center">100%</span>
+            <button id="zoomIn" class="p-1 hover:bg-[var(--bg-primary)] rounded" title="Zoom In">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="flex-1 overflow-hidden relative flex items-center justify-center p-4 bg-[var(--bg-primary)]">
+        <div id="outputWrapper" class="origin-center transition-transform duration-100 ease-out shadow-2xl">
+          <pre id="asciiOutput"></pre>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState"
+          class="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-secondary)] pointer-events-none">
+          <div class="w-16 h-16 mb-4 rounded-2xl bg-[var(--bg-tertiary)] flex items-center justify-center">
+            <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+          </div>
+          <p class="text-sm font-medium">No image loaded</p>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader"
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20 hidden">
+          <div class="loader"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Web Worker Script Blob -->
+  <script id="workerScript" type="javascript/worker">
+    self.onmessage = function(e) {
+      const { imageData, width, height, options } = e.data;
+      const { resolution, chars, invert, contrast, brightness, saturation, sepia, colorMode } = options;
+      
+      // Helper to adjust color
+      function adjustColor(r, g, b, contrast, brightness, saturation, sepia) {
+        // Saturation
+        if (saturation !== 100) {
+          const satMult = saturation / 100;
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          r = gray + (r - gray) * satMult;
+          g = gray + (g - gray) * satMult;
+          b = gray + (b - gray) * satMult;
+        }
+
+        // Sepia
+        if (sepia > 0) {
+          const sepAmount = sepia / 100;
+          const tr = (r * 0.393) + (g * 0.769) + (b * 0.189);
+          const tg = (r * 0.349) + (g * 0.686) + (b * 0.168);
+          const tb = (r * 0.272) + (g * 0.534) + (b * 0.131);
+          r = r * (1 - sepAmount) + tr * sepAmount;
+          g = g * (1 - sepAmount) + tg * sepAmount;
+          b = b * (1 - sepAmount) + tb * sepAmount;
+        }
+
+        // Brightness
+        r += brightness; g += brightness; b += brightness;
+        
+        // Contrast
+        const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+        r = factor * (r - 128) + 128;
+        g = factor * (g - 128) + 128;
+        b = factor * (b - 128) + 128;
+        
+        return [
+          Math.max(0, Math.min(255, r)),
+          Math.max(0, Math.min(255, g)),
+          Math.max(0, Math.min(255, b))
+        ];
+      }
+
+      const cols = Math.floor(width / resolution);
+      const rows = Math.floor(height / (resolution * 2)); // 2 is approx aspect ratio of mono font
+      
+      let output = '';
+      let rawText = '';
+      
+      for (let y = 0; y < rows; y++) {
+        let lineHtml = '';
+        let lineText = '';
+        
+        for (let x = 0; x < cols; x++) {
+          const posX = x * resolution;
+          const posY = y * resolution * 2;
+          
+          let r = 0, g = 0, b = 0, count = 0;
+          
+          // Sample block
+          for (let by = 0; by < resolution * 2 && posY + by < height; by++) {
+            for (let bx = 0; bx < resolution && posX + bx < width; bx++) {
+              const idx = ((posY + by) * width + (posX + bx)) * 4;
+              r += imageData[idx];
+              g += imageData[idx + 1];
+              b += imageData[idx + 2];
+              count++;
+            }
+          }
+          
+          if (count > 0) {
+            r = Math.floor(r / count);
+            g = Math.floor(g / count);
+            b = Math.floor(b / count);
+          }
+
+          // Apply filters
+          [r, g, b] = adjustColor(r, g, b, contrast, brightness, saturation, sepia);
+          
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          let charIdx = Math.floor((gray / 255) * (chars.length - 1));
+          
+          if (invert) charIdx = chars.length - 1 - charIdx;
+          
+          const char = chars[charIdx] || ' ';
+          const safeChar = char.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          
+          if (colorMode) {
+            lineHtml += `<span style="color: rgb(${Math.floor(r)},${Math.floor(g)},${Math.floor(b)})">${safeChar}</span>`;
+          } else {
+            lineHtml += safeChar;
+          }
+          lineText += char;
+        }
+        output += lineHtml + '\n';
+        rawText += lineText + '\n';
+      }
+      
+      self.postMessage({ html: output, text: rawText, cols, rows });
+    };
+  </script>
+
+  <script>
+    // --- App State & Refs ---
+    const state = {
+      source: 'image', // image, camera, video
+      resolution: 6,
+      charSet: 'standard',
+      customChars: '',
+      invert: false,
+      contrast: 0,
+      brightness: 0,
+      saturation: 100,
+      sepia: 0,
+      color: true,
+      zoom: 1,
+      isPlaying: false,
+      rafId: null
+    };
+
+    const charSets = {
+      ultra: " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+      standard: " .:-=+*#%@",
+      simple: " .:-=+*#%@8",
+      numbers: " 1234567890",
+      letters: " abcdefghijklmnopqrstuvwxyz",
+      blocks: " ░▒▓█",
+      binary: " 01",
+      matrix: " 01",
+      smileys: " ☺☻",
+      geometric: " ○◔◑◕●",
+      arrows: " ↑↗→↘↓↙←↖",
+    };
+
+    // DOM Elements
+    const els = {
+      dropZone: document.getElementById('dropZone'),
+      fileInput: document.getElementById('fileInput'),
+      videoInput: document.getElementById('videoInput'),
+      asciiOutput: document.getElementById('asciiOutput'),
+      outputWrapper: document.getElementById('outputWrapper'),
+      emptyState: document.getElementById('emptyState'),
+      webcamVideo: document.getElementById('webcamVideo'),
+      uploadedVideo: document.getElementById('uploadedVideo'),
+      loader: document.getElementById('loader'),
+      toast: document.getElementById('toast'),
+      statDims: document.getElementById('statDims'),
+      statFps: document.getElementById('statFps'),
+
+      // Inputs
+      inpRes: document.getElementById('inpRes'),
+      valRes: document.getElementById('valRes'),
+      selCharSet: document.getElementById('selCharSet'),
+      charPreview: document.getElementById('charPreview'),
+      inpCustomChars: document.getElementById('inpCustomChars'),
+      chkInvert: document.getElementById('chkInvert'),
+      inpContrast: document.getElementById('inpContrast'),
+      valContrast: document.getElementById('valContrast'),
+      inpBrightness: document.getElementById('inpBrightness'),
+      valBrightness: document.getElementById('valBrightness'),
+      inpSaturation: document.getElementById('inpSaturation'),
+      valSaturation: document.getElementById('valSaturation'),
+      inpSepia: document.getElementById('inpSepia'),
+      valSepia: document.getElementById('valSepia'),
+      chkColor: document.getElementById('chkColor'),
+
+      // Tabs
+      tabImage: document.getElementById('tabImage'),
+      tabCamera: document.getElementById('tabCamera'),
+      tabVideo: document.getElementById('tabVideo'),
+      panelImage: document.getElementById('panelImage'),
+      panelCamera: document.getElementById('panelCamera'),
+      panelVideo: document.getElementById('panelVideo'),
+    };
+
+    // Worker Setup
+    const workerBlob = new Blob([document.getElementById('workerScript').textContent], { type: 'text/javascript' });
+    const worker = new Worker(URL.createObjectURL(workerBlob));
+
+    let currentImage = null; // Image object or Video element
+    let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let isGenerating = false;
+    let lastRawText = '';
+
+    // --- Initialization ---
+    function init() {
+      setupEventListeners();
+      setupTabs();
+      updateZoom();
+      updateCharPreview();
+    }
+
+    function setupEventListeners() {
+      // Inputs
+      els.inpRes.addEventListener('input', e => {
+        state.resolution = parseInt(e.target.value);
+        els.valRes.textContent = state.resolution + 'px';
+        triggerGenerate();
+      });
+
+      els.selCharSet.addEventListener('change', e => {
+        state.charSet = e.target.value;
+        els.inpCustomChars.classList.toggle('hidden', state.charSet !== 'custom');
+        updateCharPreview();
+        triggerGenerate();
+      });
+
+      els.inpCustomChars.addEventListener('input', e => {
+        state.customChars = e.target.value;
+        updateCharPreview();
+        triggerGenerate();
+      });
+
+      els.chkInvert.addEventListener('change', e => {
+        state.invert = e.target.checked;
+        updateCharPreview();
+        triggerGenerate();
+      });
+
+      els.inpContrast.addEventListener('input', e => {
+        state.contrast = parseInt(e.target.value);
+        els.valContrast.textContent = state.contrast;
+        triggerGenerate();
+      });
+
+      els.inpBrightness.addEventListener('input', e => {
+        state.brightness = parseInt(e.target.value);
+        els.valBrightness.textContent = state.brightness;
+        triggerGenerate();
+      });
+
+      els.inpSaturation.addEventListener('input', e => {
+        state.saturation = parseInt(e.target.value);
+        els.valSaturation.textContent = state.saturation + '%';
+        triggerGenerate();
+      });
+
+      els.inpSepia.addEventListener('input', e => {
+        state.sepia = parseInt(e.target.value);
+        els.valSepia.textContent = state.sepia + '%';
+        triggerGenerate();
+      });
+
+      els.chkColor.addEventListener('change', e => {
+        state.color = e.target.checked;
+        triggerGenerate();
+      });
+
+      // Zoom
+      document.getElementById('zoomIn').addEventListener('click', () => {
+        state.zoom = Math.min(5, state.zoom + 0.1);
+        updateZoom();
+      });
+      document.getElementById('zoomOut').addEventListener('click', () => {
+        state.zoom = Math.max(0.1, state.zoom - 0.1);
+        updateZoom();
+      });
+
+      // File Upload
+      els.dropZone.addEventListener('click', () => els.fileInput.click());
+      els.fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+      els.dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        els.dropZone.classList.add('active');
+      });
+      els.dropZone.addEventListener('dragleave', () => els.dropZone.classList.remove('active'));
+      els.dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        els.dropZone.classList.remove('active');
+        handleFile(e.dataTransfer.files[0]);
+      });
+
+      // Video Upload
+      els.videoInput.addEventListener('change', e => handleVideoFile(e.target.files[0]));
+      document.querySelector('#panelVideo .drop-zone').addEventListener('click', () => els.videoInput.click());
+
+      // Camera
+      document.getElementById('btnToggleCam').addEventListener('click', toggleCamera);
+
+      // Worker Message
+      worker.onmessage = e => {
+        const { html, text, cols, rows } = e.data;
+        els.asciiOutput.innerHTML = html;
+        lastRawText = text;
+        els.statDims.textContent = `${cols} x ${rows}`;
+        isGenerating = false;
+        els.emptyState.classList.add('hidden');
+        els.loader.classList.add('hidden');
+
+        if (state.source === 'video' || state.source === 'camera') {
+          requestAnimationFrame(processFrame);
+        }
+      };
+
+      // Theme
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') !== 'light';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      });
+
+      // Export
+      document.getElementById('btnCopy').addEventListener('click', () => {
+        navigator.clipboard.writeText(lastRawText).then(() => showToast('Copied to clipboard!'));
+      });
+      document.getElementById('btnDownloadTxt').addEventListener('click', () => download(lastRawText, 'ascii.txt', 'text/plain'));
+      document.getElementById('btnDownloadHtml').addEventListener('click', () => {
+        const html = `<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:monospace;white-space:pre;line-height:0.85">${els.asciiOutput.innerHTML}</body></html>`;
+        download(html, 'ascii.html', 'text/html');
+      });
+      document.getElementById('btnDownloadPng').addEventListener('click', exportPng);
+    }
+
+    function setupTabs() {
+      const tabs = ['Image', 'Camera', 'Video'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab${t}`);
+        btn.addEventListener('click', () => {
+          // Reset UI
+          tabs.forEach(x => {
+            document.getElementById(`tab${x}`).className = 'flex-1 btn btn-secondary text-xs';
+            document.getElementById(`panel${x}`).classList.add('hidden');
+          });
+          btn.className = 'flex-1 btn btn-primary text-xs';
+          document.getElementById(`panel${t}`).classList.remove('hidden');
+
+          // Stop previous
+          stopMedia();
+          state.source = t.toLowerCase();
+
+          if (state.source === 'image' && currentImage instanceof Image) {
+            triggerGenerate();
+          }
+        });
+      });
+    }
+
+    // --- Logic ---
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return showToast('Invalid image file', 'error');
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          currentImage = img;
+          triggerGenerate();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleVideoFile(file) {
+      if (!file || !file.type.startsWith('video/')) return showToast('Invalid video file', 'error');
+
+      const url = URL.createObjectURL(file);
+      els.uploadedVideo.src = url;
+      els.uploadedVideo.classList.remove('hidden');
+      currentImage = els.uploadedVideo;
+
+      els.uploadedVideo.play();
+      processFrame();
+    }
+
+    async function toggleCamera() {
+      const btn = document.getElementById('btnToggleCam');
+      if (state.rafId) {
+        stopMedia();
+        btn.textContent = 'Start Camera';
+        document.getElementById('camPlaceholder').classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        els.webcamVideo.srcObject = stream;
+        currentImage = els.webcamVideo;
+        state.rafId = true; // Flag to indicate active
+        btn.textContent = 'Stop Camera';
+        document.getElementById('camPlaceholder').classList.add('hidden');
+        processFrame();
+      } catch (e) {
+        showToast('Camera access denied', 'error');
+      }
+    }
+
+    function stopMedia() {
+      if (els.webcamVideo.srcObject) {
+        els.webcamVideo.srcObject.getTracks().forEach(t => t.stop());
+        els.webcamVideo.srcObject = null;
+      }
+      if (els.uploadedVideo.src) {
+        els.uploadedVideo.pause();
+      }
+      state.rafId = null;
+    }
+
+    function triggerGenerate() {
+      if (!currentImage) return;
+      if (state.source === 'image') {
+        processFrame();
+      }
+    }
+
+    function processFrame() {
+      if (!currentImage) return;
+      if (isGenerating && state.source !== 'image') return; // Skip frame if busy
+
+      // Draw to canvas
+      const w = currentImage.videoWidth || currentImage.width;
+      const h = currentImage.videoHeight || currentImage.height;
+
+      if (!w || !h) {
+        if (state.source !== 'image') requestAnimationFrame(processFrame);
+        return;
+      }
+
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+
+      ctx.drawImage(currentImage, 0, 0, w, h);
+      const imageData = ctx.getImageData(0, 0, w, h);
+
+      // Prepare options
+      const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
+      const options = {
+        resolution: state.resolution,
+        chars: chars || charSets.standard,
+        invert: state.invert,
+        contrast: state.contrast,
+        brightness: state.brightness,
+        saturation: state.saturation,
+        sepia: state.sepia,
+        colorMode: state.color
+      };
+
+      isGenerating = true;
+      worker.postMessage({
+        imageData: imageData.data,
+        width: w,
+        height: h,
+        options
+      });
+    }
+
+    function updateCharPreview() {
+      let chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
+      if (!chars) chars = charSets.standard;
+
+      // Show preview respecting invert
+      let displayChars = chars.split('');
+      if (state.invert) displayChars.reverse();
+
+      els.charPreview.textContent = displayChars.join('');
+    }
+
+    function updateZoom() {
+      document.getElementById('zoomVal').textContent = Math.round(state.zoom * 100) + '%';
+      els.outputWrapper.style.transform = `scale(${state.zoom})`;
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = els.toast;
+      t.textContent = msg;
+      t.className = `toast show ${type}`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function download(content, name, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded ' + name);
+    }
+
+    function exportPng() {
+      if (!els.asciiOutput.textContent.trim()) return showToast('No output to export', 'warning');
+
+      showToast('Generating PNG...', 'success');
+
+      setTimeout(() => {
+        try {
+          const lines = lastRawText.split('\n');
+          if (lines[lines.length - 1] === '') lines.pop();
+
+          const fontSize = 12;
+          const lineHeight = 10;
+          const font = '12px "JetBrains Mono", monospace';
+
+          const tmpCanvas = document.createElement('canvas');
+          const tmpCtx = tmpCanvas.getContext('2d');
+          tmpCtx.font = font;
+          const charWidth = tmpCtx.measureText('M').width;
+
+          const cols = lines.reduce((max, line) => Math.max(max, line.length), 0);
+          const width = Math.ceil(cols * charWidth) + 40;
+          const height = Math.ceil(lines.length * lineHeight) + 40;
+
+          const cvs = document.createElement('canvas');
+          cvs.width = width;
+          cvs.height = height;
+          const c = cvs.getContext('2d');
+
+          const isDark = document.body.getAttribute('data-theme') !== 'light';
+          c.fillStyle = isDark ? '#09090b' : '#ffffff';
+          c.fillRect(0, 0, width, height);
+
+          c.textBaseline = 'top';
+          c.font = font;
+
+          if (!state.color) {
+            c.fillStyle = isDark ? '#f4f4f5' : '#18181b';
+            lines.forEach((line, i) => {
+              c.fillText(line, 20, 20 + (i * lineHeight));
+            });
+          } else {
+            let y = 20;
+            const lineNodes = els.asciiOutput.innerHTML.split('\n');
+
+            lineNodes.forEach(lineHtml => {
+              if (!lineHtml) return;
+              let x = 20;
+              const div = document.createElement('div');
+              div.innerHTML = lineHtml;
+
+              div.childNodes.forEach(node => {
+                if (node.nodeType === 3) {
+                  c.fillStyle = isDark ? '#f4f4f5' : '#18181b';
+                  c.fillText(node.textContent, x, y);
+                  x += node.textContent.length * charWidth;
+                } else if (node.nodeType === 1) {
+                  c.fillStyle = node.style.color || (isDark ? '#f4f4f5' : '#18181b');
+                  c.fillText(node.textContent, x, y);
+                  x += node.textContent.length * charWidth;
+                }
+              });
+              y += lineHeight;
+            });
+          }
+
+          cvs.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ascii-art.png';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('PNG Saved!');
+          });
+
+        } catch (e) {
+          console.error(e);
+          showToast('Export failed', 'error');
+        }
+      }, 50);
+    }
+
+    // Init
+    init();
+
+  </script>
+</body>
+
+</html>
