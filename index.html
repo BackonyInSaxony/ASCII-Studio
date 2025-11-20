@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Pro ASCII Art Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
@@ -40,6 +40,7 @@
       background-color: var(--bg-primary);
       color: var(--text-primary);
       transition: background-color 0.3s, color 0.3s;
+      overscroll-behavior: none;
     }
 
     .font-mono {
@@ -48,8 +49,8 @@
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
     }
 
     ::-webkit-scrollbar-track {
@@ -58,21 +59,14 @@
 
     ::-webkit-scrollbar-thumb {
       background: var(--border);
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
       background: var(--text-secondary);
     }
 
-    /* Glassmorphism & UI Components */
-    .glass-panel {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 1rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
+    /* UI Components */
     .control-group {
       background: var(--bg-tertiary);
       border: 1px solid var(--border);
@@ -86,14 +80,17 @@
     }
 
     .btn {
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1rem;
       border-radius: 0.5rem;
       font-weight: 500;
       transition: all 0.2s;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       cursor: pointer;
+      font-size: 0.875rem;
+      user-select: none;
     }
 
     .btn-primary {
@@ -151,6 +148,7 @@
       padding: 0.5rem;
       border-radius: 0.5rem;
       outline: none;
+      font-size: 0.875rem;
     }
 
     .select-input:focus {
@@ -171,15 +169,12 @@
       background: rgba(99, 102, 241, 0.1);
     }
 
-    /* ASCII Output */
-    #asciiOutput {
-      font-size: 10px;
-      line-height: 0.85;
-      /* Adjust based on font */
-      overflow: auto;
-      white-space: pre;
-      width: 100%;
-      height: 100%;
+    /* Canvas Output */
+    #outputCanvas {
+      image-rendering: pixelated;
+      max-width: 100%;
+      max-height: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
     /* Toast */
@@ -196,7 +191,7 @@
       transform: translateY(100px);
       opacity: 0;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 50;
+      z-index: 60;
     }
 
     .toast.show {
@@ -212,39 +207,55 @@
       border-left: 4px solid var(--error);
     }
 
-    /* Loading Overlay */
-    .loader {
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      border-top: 3px solid var(--accent);
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
+    /* Mobile Sidebar */
+    .sidebar {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Responsive tweaks */
     @media (max-width: 1024px) {
-      .main-layout {
-        flex-direction: column;
-      }
-
       .sidebar {
-        width: 100% !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 50;
+        transform: translateX(-100%);
+        box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
       }
 
-      .output-area {
-        height: 60vh !important;
+      .sidebar.open {
+        transform: translateX(0);
       }
+
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+
+      .sidebar-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    /* Accordion */
+    details>summary {
+      list-style: none;
+      cursor: pointer;
+    }
+
+    details>summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details[open]>summary .arrow {
+      transform: rotate(180deg);
     }
   </style>
 </head>
@@ -253,279 +264,260 @@
 
   <!-- Header -->
   <header
-    class="h-16 border-b border-[var(--border)] bg-[var(--bg-secondary)] flex items-center justify-between px-6 shrink-0 z-10">
+    class="h-16 border-b border-[var(--border)] bg-[var(--bg-secondary)] flex items-center justify-between px-4 lg:px-6 shrink-0 z-30">
     <div class="flex items-center gap-3">
+      <button id="btnMenu" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-tertiary)]">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
       <div
         class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold font-mono">
         A</div>
-      <h1 class="text-xl font-bold tracking-tight">Pro ASCII Studio</h1>
+      <h1 class="text-lg lg:text-xl font-bold tracking-tight truncate">Pro ASCII Studio</h1>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
       <button id="themeToggle" class="p-2 rounded-full hover:bg-[var(--bg-tertiary)] transition" title="Toggle Theme">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
         </svg>
       </button>
-      <a href="https://github.com" target="_blank"
-        class="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)]">v2.1.0</a>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 flex main-layout overflow-hidden">
+  <main class="flex-1 flex relative overflow-hidden">
+
+    <!-- Mobile Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay lg:hidden"></div>
 
     <!-- Sidebar Controls -->
-    <aside
-      class="sidebar w-[400px] bg-[var(--bg-primary)] border-r border-[var(--border)] flex flex-col overflow-y-auto p-6 gap-6 shrink-0">
+    <aside id="sidebar"
+      class="sidebar w-[320px] lg:w-[360px] bg-[var(--bg-primary)] border-r border-[var(--border)] flex flex-col overflow-y-auto shrink-0">
 
-      <!-- Input Section -->
-      <section>
-        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Input Source</h2>
-        <div class="flex gap-2 mb-3">
-          <button id="tabImage" class="flex-1 btn btn-primary text-xs" title="Convert Image">Image</button>
-          <button id="tabCamera" class="flex-1 btn btn-secondary text-xs" title="Use Webcam">Camera</button>
-          <button id="tabVideo" class="flex-1 btn btn-secondary text-xs" title="Convert Video">Video</button>
-          <button id="tabText" class="flex-1 btn btn-secondary text-xs" title="Type Text">Text</button>
-        </div>
+      <div class="p-4 flex flex-col gap-4">
 
-        <!-- Image Upload -->
-        <div id="panelImage" class="block">
-          <label id="dropZone" class="drop-zone flex flex-col items-center justify-center p-8 cursor-pointer h-40">
-            <svg class="w-8 h-8 text-[var(--text-secondary)] mb-2" fill="none" stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-              </path>
-            </svg>
-            <span class="text-sm text-[var(--text-secondary)]">Drop image or click</span>
-            <input type="file" id="fileInput" accept="image/*" class="hidden" />
-          </label>
-        </div>
+        <!-- Input Source -->
+        <div class="control-group">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Input</h2>
+          <div class="grid grid-cols-4 gap-1 mb-3">
+            <button id="tabImage" class="btn btn-primary text-[10px] px-1 py-2">Image</button>
+            <button id="tabCamera" class="btn btn-secondary text-[10px] px-1 py-2">Cam</button>
+            <button id="tabVideo" class="btn btn-secondary text-[10px] px-1 py-2">Video</button>
+            <button id="tabText" class="btn btn-secondary text-[10px] px-1 py-2">Text</button>
+          </div>
 
-        <!-- Camera -->
-        <div id="panelCamera" class="hidden">
-          <div class="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-            <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
-            <div id="camPlaceholder"
-              class="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] text-sm">Camera off
+          <!-- Panels -->
+          <div id="panelImage" class="block">
+            <label id="dropZone" class="drop-zone flex flex-col items-center justify-center p-4 cursor-pointer h-32">
+              <svg class="w-6 h-6 text-[var(--text-secondary)] mb-2" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                </path>
+              </svg>
+              <span class="text-xs text-[var(--text-secondary)]">Drop or Click</span>
+              <input type="file" id="fileInput" accept="image/*" class="hidden" />
+            </label>
+          </div>
+
+          <div id="panelCamera" class="hidden">
+            <div class="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
+              <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+              <div id="camPlaceholder"
+                class="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] text-xs">Camera
+                off</div>
+            </div>
+            <button id="btnToggleCam" class="btn btn-secondary w-full justify-center text-xs">Start Camera</button>
+          </div>
+
+          <div id="panelVideo" class="hidden">
+            <label class="drop-zone flex flex-col items-center justify-center p-4 cursor-pointer h-24 mb-2">
+              <span class="text-xs text-[var(--text-secondary)]">Select Video</span>
+              <input type="file" id="videoInput" accept="video/*" class="hidden" />
+            </label>
+            <video id="uploadedVideo" class="hidden" playsinline></video>
+            <div id="videoControls" class="hidden flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <button id="btnVidToggle" class="btn btn-primary text-[10px] py-1 px-2">Play</button>
+                <span id="vidTime" class="text-[10px] font-mono text-[var(--text-secondary)]">0:00</span>
+              </div>
+              <input type="range" id="vidProgress" min="0" max="100" value="0" class="input-range">
             </div>
           </div>
-          <button id="btnToggleCam" class="btn btn-secondary w-full justify-center">Start Camera</button>
-        </div>
 
-        <!-- Video Upload -->
-        <div id="panelVideo" class="hidden">
-          <label class="drop-zone flex flex-col items-center justify-center p-8 cursor-pointer h-32 mb-2">
-            <span class="text-sm text-[var(--text-secondary)]">Drop video file</span>
-            <input type="file" id="videoInput" accept="video/*" class="hidden" />
-          </label>
-          <!-- Hidden Video Element -->
-          <video id="uploadedVideo" class="hidden" playsinline></video>
-
-          <!-- Custom Video Controls -->
-          <div id="videoControls" class="control-group flex flex-col gap-2 hidden">
-            <div class="flex items-center justify-between">
-              <button id="btnVidToggle" class="btn btn-primary text-xs py-1 px-2">Play</button>
-              <span id="vidTime" class="text-[10px] font-mono text-[var(--text-secondary)]">00:00 / 00:00</span>
-            </div>
-            <input type="range" id="vidProgress" min="0" max="100" value="0" class="input-range">
-            <div class="flex items-center gap-2">
-              <button id="btnVidMute"
-                class="text-xs font-mono text-[var(--text-secondary)] hover:text-white">Mute</button>
-              <input type="range" id="vidVolume" min="0" max="1" step="0.1" value="1" class="input-range w-20">
-            </div>
-          </div>
-        </div>
-
-        <!-- Text Input -->
-        <div id="panelText" class="hidden flex flex-col gap-3">
-          <textarea id="inpText" class="select-input h-24 font-mono text-sm resize-none"
-            placeholder="Type something..."></textarea>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-xs font-medium mb-1 block">Font</label>
+          <div id="panelText" class="hidden flex flex-col gap-2">
+            <textarea id="inpText" class="select-input h-20 font-mono text-xs resize-none"
+              placeholder="Type..."></textarea>
+            <div class="grid grid-cols-2 gap-2">
               <select id="selFont" class="select-input text-xs">
-                <option value="Inter">Inter (Clean)</option>
-                <option value="JetBrains Mono">Mono (Code)</option>
-                <option value="Bangers">Bangers (Comic)</option>
-                <option value="Creepster">Creepster (Scary)</option>
-                <option value="VT323">VT323 (Retro)</option>
-                <option value="Dancing Script">Script (Cursive)</option>
-                <option value="Press Start 2P">Press Start 2P (8-bit)</option>
-                <option value="Lobster">Lobster (Bold)</option>
-                <option value="Orbitron">Orbitron (Sci-Fi)</option>
-                <option value="Pacifico">Pacifico (Brush)</option>
+                <option value="Inter">Inter</option>
+                <option value="JetBrains Mono">Mono</option>
+                <option value="Bangers">Comic</option>
+                <option value="VT323">Retro</option>
               </select>
-            </div>
-            <div>
-              <label class="text-xs font-medium mb-1 block">Size</label>
               <input type="number" id="inpFontSize" value="60" min="10" max="200" class="select-input text-xs">
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- Settings -->
-      <section id="secConfig">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Configuration</h2>
-
-        <div class="control-group flex flex-col gap-4">
-          <!-- Resolution -->
-          <div id="grpResolution">
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Resolution (Block Size)</label>
-              <span id="valRes" class="text-xs font-mono text-[var(--text-secondary)]">6px</span>
+        <!-- Style Settings -->
+        <details class="control-group" open>
+          <summary
+            class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+            <span>Style</span>
+            <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </summary>
+          <div class="flex flex-col gap-3">
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-xs font-medium">Resolution</label>
+                <span id="valRes" class="text-xs font-mono text-[var(--text-secondary)]">6px</span>
+              </div>
+              <input type="range" id="inpRes" min="1" max="20" value="6" class="input-range">
             </div>
-            <input type="range" id="inpRes" min="1" max="20" value="6" class="input-range">
-          </div>
-
-          <!-- Char Set -->
-          <div id="grpCharSet">
-            <label class="text-xs font-medium mb-1 block">Character Set</label>
-            <select id="selCharSet" class="select-input text-sm">
-              <option value="ultra">Ultra Detailed</option>
-              <option value="standard" selected>Standard</option>
-              <option value="simple">Simple</option>
-              <option value="numbers">Numbers</option>
-              <option value="letters">Letters</option>
-              <option value="blocks">Blocks</option>
-              <option value="binary">Binary</option>
-              <option value="matrix">Matrix</option>
-              <option value="smileys">Smileys</option>
-              <option value="geometric">Geometric</option>
-              <option value="arrows">Arrows</option>
-              <option value="braille">Braille</option>
-              <option value="morse">Morse</option>
-              <option value="katakana">Katakana</option>
-              <option value="custom">Custom</option>
-            </select>
-            <div id="charPreview"
-              class="mt-2 p-2 bg-[var(--bg-primary)] rounded text-[10px] font-mono break-all text-[var(--text-secondary)] border border-[var(--border)]">
+            <div>
+              <label class="text-xs font-medium mb-1 block">Char Set</label>
+              <select id="selCharSet" class="select-input text-xs">
+                <option value="standard" selected>Standard</option>
+                <option value="ultra">Ultra High Detail</option>
+                <option value="simple">Simple</option>
+                <option value="numbers">Numbers</option>
+                <option value="letters">Letters</option>
+                <option value="blocks">Blocks</option>
+                <option value="matrix">Matrix</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input id="inpCustomChars" type="text" class="select-input mt-2 hidden text-xs font-mono"
+                placeholder="Custom chars..." />
             </div>
-            <input id="inpCustomChars" type="text" class="select-input mt-2 hidden text-sm font-mono"
-              placeholder="Enter chars..." />
-          </div>
-
-          <!-- Theme -->
-          <div id="grpTheme">
-            <label class="text-xs font-medium mb-1 block">Theme</label>
-            <select id="selTheme" class="select-input text-sm mb-2">
-              <option value="original" selected>Original (Color)</option>
-              <option value="monochrome">Monochrome</option>
-              <option value="red">Red Matrix</option>
-              <option value="green">Hacker Green</option>
-              <option value="blue">Cyber Blue</option>
-              <option value="custom">Custom Color</option>
-              <option value="gameboy">Gameboy</option>
-              <option value="neon">Neon Nights</option>
-              <option value="crystals">Crystals</option>
-            </select>
-            <div id="customThemeColorContainer" class="hidden flex items-center gap-2">
-              <input type="color" id="inpThemeColor" value="#ff00ff"
-                class="h-8 w-full cursor-pointer rounded border border-[var(--border)] bg-[var(--bg-primary)] p-1">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-medium">Invert</label>
+              <input type="checkbox" id="chkInvert" class="w-4 h-4 rounded border-[var(--border)]">
             </div>
           </div>
+        </details>
 
-          <!-- Invert -->
-          <div class="flex items-center justify-between" id="grpInvert">
-            <label class="text-xs font-medium">Invert Characters</label>
-            <input type="checkbox" id="chkInvert" class="w-4 h-4 rounded border-[var(--border)]">
+        <!-- Color Settings -->
+        <details class="control-group" open>
+          <summary
+            class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+            <span>Color & Palette</span>
+            <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </summary>
+          <div class="flex flex-col gap-3">
+            <!-- Theme -->
+            <div>
+              <label class="text-xs font-medium mb-1 block">Theme (Tint)</label>
+              <select id="selTheme" class="select-input text-xs mb-2">
+                <option value="original" selected>Original</option>
+                <option value="monochrome">Monochrome</option>
+                <option value="red">Red Matrix</option>
+                <option value="green">Hacker Green</option>
+                <option value="blue">Cyber Blue</option>
+                <option value="custom">Custom Tint</option>
+                <option value="neon">Neon Gradient</option>
+              </select>
+              <div id="customThemeColorContainer" class="hidden">
+                <input type="color" id="inpThemeColor" value="#ff00ff" class="h-8 w-full rounded cursor-pointer">
+              </div>
+            </div>
+
+            <!-- Palette -->
+            <div>
+              <label class="text-xs font-medium mb-1 block">Palette (Quantize)</label>
+              <select id="selPalette" class="select-input text-xs mb-2">
+                <option value="none" selected>None (True Color)</option>
+                <option value="gameboy">Gameboy (4 Colors)</option>
+                <option value="cga">CGA (16 Colors)</option>
+                <option value="sepia">Sepia Tone</option>
+                <option value="grayscale">Grayscale</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="custom">Custom Palette</option>
+              </select>
+
+              <!-- Custom Palette Editor -->
+              <div id="customPaletteEditor"
+                class="hidden flex flex-wrap gap-2 p-2 bg-[var(--bg-primary)] rounded border border-[var(--border)]">
+                <!-- Colors injected here -->
+                <button id="btnAddPaletteColor"
+                  class="w-6 h-6 rounded-full border border-dashed border-[var(--text-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)]">+</button>
+              </div>
+            </div>
           </div>
+        </details>
+
+        <!-- Adjustments -->
+        <details class="control-group">
+          <summary
+            class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+            <span>Adjustments</span>
+            <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </summary>
+          <div class="flex flex-col gap-3">
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-xs font-medium">Contrast</label>
+                <span id="valContrast" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
+              </div>
+              <input type="range" id="inpContrast" min="-100" max="100" value="0" class="input-range">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-xs font-medium">Brightness</label>
+                <span id="valBrightness" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
+              </div>
+              <input type="range" id="inpBrightness" min="-100" max="100" value="0" class="input-range">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-xs font-medium">Saturation</label>
+                <span id="valSaturation" class="text-xs font-mono text-[var(--text-secondary)]">100%</span>
+              </div>
+              <input type="range" id="inpSaturation" min="0" max="200" value="100" class="input-range">
+            </div>
+          </div>
+        </details>
+
+        <!-- Export -->
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <button id="btnViewText" class="btn btn-secondary text-xs justify-center">View Text</button>
+          <button id="btnDownloadPng" class="btn btn-primary text-xs justify-center">Save PNG</button>
         </div>
-      </section>
-
-      <!-- Filters -->
-      <section id="secFilters">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Filters</h2>
-        <div class="control-group flex flex-col gap-4">
-          <div>
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Contrast</label>
-              <span id="valContrast" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
-            </div>
-            <input type="range" id="inpContrast" min="-100" max="100" value="0" class="input-range">
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Brightness</label>
-              <span id="valBrightness" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
-            </div>
-            <input type="range" id="inpBrightness" min="-100" max="100" value="0" class="input-range">
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Saturation</label>
-              <span id="valSaturation" class="text-xs font-mono text-[var(--text-secondary)]">100%</span>
-            </div>
-            <input type="range" id="inpSaturation" min="0" max="200" value="100" class="input-range">
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Sepia</label>
-              <span id="valSepia" class="text-xs font-mono text-[var(--text-secondary)]">0%</span>
-            </div>
-            <input type="range" id="inpSepia" min="0" max="100" value="0" class="input-range">
-          </div>
-          <!-- New Filters -->
-          <div>
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Blur</label>
-              <span id="valBlur" class="text-xs font-mono text-[var(--text-secondary)]">0px</span>
-            </div>
-            <input type="range" id="inpBlur" min="0" max="10" value="0" class="input-range">
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <label class="text-xs font-medium">Hue Rotate</label>
-              <span id="valHue" class="text-xs font-mono text-[var(--text-secondary)]">0°</span>
-            </div>
-            <input type="range" id="inpHue" min="0" max="360" value="0" class="input-range">
-          </div>
+        <div id="statusBar" class="text-[10px] font-mono text-[var(--text-secondary)] text-center opacity-50 mt-2">Ready
         </div>
-      </section>
-
-      <!-- Export -->
-      <section class="mt-auto">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Export</h2>
-        <div class="grid grid-cols-2 gap-2">
-          <button id="btnCopy" class="btn btn-secondary justify-center text-xs" title="Copy to Clipboard">Copy
-            Text</button>
-          <button id="btnDownloadTxt" class="btn btn-secondary justify-center text-xs" title="Download .txt">Save
-            .txt</button>
-          <button id="btnDownloadHtml" class="btn btn-secondary justify-center text-xs" title="Download HTML">Save
-            HTML</button>
-          <button id="btnDownloadPng" class="btn btn-secondary justify-center text-xs" title="Download PNG">Save
-            PNG</button>
-        </div>
-        <div id="statusBar" class="mt-4 text-[10px] font-mono text-[var(--text-secondary)] text-center opacity-50">Ready
-        </div>
-      </section>
+      </div>
     </aside>
 
     <!-- Output Area -->
-    <section class="output-area flex-1 bg-[var(--bg-secondary)] relative flex flex-col min-w-0">
+    <section class="flex-1 bg-[var(--bg-secondary)] relative flex flex-col min-w-0">
       <!-- Toolbar -->
-      <div class="h-10 border-b border-[var(--border)] flex items-center px-4 justify-between bg-[var(--bg-tertiary)]">
+      <div
+        class="h-10 border-b border-[var(--border)] flex items-center px-4 justify-between bg-[var(--bg-tertiary)] shrink-0">
         <div class="flex items-center gap-4">
           <span id="statDims" class="text-xs font-mono text-[var(--text-secondary)]">0 x 0</span>
-          <span id="statFps" class="text-xs font-mono text-[var(--text-secondary)] hidden">0 FPS</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="h-4 w-px bg-[var(--border)] mx-1"></div>
-          <div class="flex gap-1">
-            <button id="zoomOut" class="p-1 hover:bg-[var(--bg-primary)] rounded" title="Zoom Out">-</button>
-            <span id="zoomVal" class="text-xs font-mono self-center w-8 text-center">100%</span>
-            <button id="zoomIn" class="p-1 hover:bg-[var(--bg-primary)] rounded" title="Zoom In">+</button>
-          </div>
+          <button id="zoomOut" class="p-1 hover:bg-[var(--bg-primary)] rounded text-[var(--text-secondary)]"
+            title="Zoom Out">-</button>
+          <span id="zoomVal"
+            class="text-xs font-mono self-center w-8 text-center text-[var(--text-secondary)]">100%</span>
+          <button id="zoomIn" class="p-1 hover:bg-[var(--bg-primary)] rounded text-[var(--text-secondary)]"
+            title="Zoom In">+</button>
         </div>
       </div>
 
       <!-- Canvas Container -->
-      <div class="flex-1 overflow-hidden relative flex items-center justify-center p-4 bg-[var(--bg-primary)]">
+      <div class="flex-1 overflow-auto relative flex items-center justify-center p-4 bg-[var(--bg-primary)]">
         <div id="outputWrapper" class="origin-center transition-transform duration-100 ease-out shadow-2xl">
-          <pre id="asciiOutput"></pre>
+          <canvas id="outputCanvas"></canvas>
         </div>
 
         <!-- Empty State -->
@@ -550,24 +542,42 @@
     </section>
   </main>
 
+  <!-- Text View Modal -->
+  <div id="textModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="textModalBg"></div>
+    <div
+      class="absolute inset-4 md:inset-10 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] flex flex-col shadow-2xl">
+      <div
+        class="h-12 border-b border-[var(--border)] flex items-center justify-between px-4 bg-[var(--bg-tertiary)] rounded-t-xl">
+        <h3 class="font-bold text-sm">ASCII Text</h3>
+        <div class="flex gap-2">
+          <button id="btnCopyText" class="btn btn-primary text-xs py-1">Copy</button>
+          <button id="btnCloseText" class="p-2 hover:bg-[var(--bg-primary)] rounded">✕</button>
+        </div>
+      </div>
+      <textarea id="textOutput"
+        class="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] font-mono text-[10px] p-4 resize-none outline-none"
+        readonly></textarea>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <!-- Web Worker Script Blob -->
   <script id="workerScript" type="javascript/worker">
     self.onmessage = function(e) {
       const { imageData, width, height, options } = e.data;
-      const { resolution, chars, invert, contrast, brightness, saturation, sepia, hue, theme, customThemeColor } = options;
+      const { resolution, chars, invert, contrast, brightness, saturation, sepia, hue, theme, customThemeColor, palette, customPalette } = options;
       
-      // Helper to adjust color
-      function adjustColor(r, g, b, contrast, brightness, saturation, sepia, hue) {
-        // Hue Rotate
+      // --- Helpers ---
+      
+      function adjustColor(r, g, b) {
+        // Hue
         if (hue !== 0) {
           const angle = hue * Math.PI / 180;
           const cosA = Math.cos(angle);
           const sinA = Math.sin(angle);
           const sqrt1_3 = 0.57735;
-          
-          // Matrix approximation for hue rotation
           const m00 = cosA + (1.0 - cosA) / 3.0;
           const m01 = 1.0/3.0 * (1.0 - cosA) - sqrt1_3 * sinA;
           const m02 = 1.0/3.0 * (1.0 - cosA) + sqrt1_3 * sinA;
@@ -577,11 +587,9 @@
           const m20 = 1.0/3.0 * (1.0 - cosA) - sqrt1_3 * sinA;
           const m21 = 1.0/3.0 * (1.0 - cosA) + sqrt1_3 * sinA;
           const m22 = cosA + 1.0/3.0 * (1.0 - cosA);
-
           const rx = r * m00 + g * m01 + b * m02;
           const gx = r * m10 + g * m11 + b * m12;
           const bx = r * m20 + g * m21 + b * m22;
-          
           r = rx; g = gx; b = bx;
         }
 
@@ -613,7 +621,7 @@
         r = factor * (r - 128) + 128;
         g = factor * (g - 128) + 128;
         b = factor * (b - 128) + 128;
-        
+
         return [
           Math.max(0, Math.min(255, r)),
           Math.max(0, Math.min(255, g)),
@@ -621,23 +629,81 @@
         ];
       }
 
-      const cols = Math.floor(width / resolution);
-      const rows = Math.floor(height / (resolution * 2)); // 2 is approx aspect ratio of mono font
-      
-      let output = '';
-      let rawText = '';
-      
-      for (let y = 0; y < rows; y++) {
-        let lineHtml = '';
-        let lineText = '';
+      function applyTheme(r, g, b, gray) {
+        if (theme === 'monochrome') return [255, 255, 255];
+        if (theme === 'red') return [gray, 0, 0];
+        if (theme === 'green') return [0, gray, 0];
+        if (theme === 'blue') return [0, 0, gray];
+        if (theme === 'custom') {
+          const hex = customThemeColor.replace('#', '');
+          const tr = parseInt(hex.substring(0, 2), 16);
+          const tg = parseInt(hex.substring(2, 4), 16);
+          const tb = parseInt(hex.substring(4, 6), 16);
+          return [(tr * gray) / 255, (tg * gray) / 255, (tb * gray) / 255];
+        }
+        if (theme === 'neon') {
+           if (gray < 85) return [gray * 3, 0, 255];
+           if (gray < 170) return [255, 0, 255 - ((gray - 85) * 3)];
+           return [255, (gray - 170) * 3, 0];
+        }
+        return [r, g, b];
+      }
+
+      function quantize(r, g, b, paletteColors) {
+        let minDist = Infinity;
+        let bestColor = [r, g, b];
         
+        for (let col of paletteColors) {
+          const dr = r - col[0];
+          const dg = g - col[1];
+          const db = b - col[2];
+          const dist = dr*dr + dg*dg + db*db;
+          if (dist < minDist) {
+            minDist = dist;
+            bestColor = col;
+          }
+        }
+        return bestColor;
+      }
+
+      // --- Main Loop ---
+
+      const cols = Math.floor(width / resolution);
+      const rows = Math.floor(height / (resolution * 2)); 
+      
+      // Buffer: Each pixel is 32-bit integer: 0xAABBGGRR (Little Endian) or similar.
+      // We need: CharIndex (8), R (8), G (8), B (8).
+      // Let's use a Uint32Array.
+      const buffer = new Uint32Array(cols * rows);
+      let rawText = '';
+
+      // Palette Setup
+      let paletteColors = null;
+      if (palette !== 'none') {
+        if (palette === 'gameboy') paletteColors = [[15, 56, 15], [48, 98, 48], [139, 172, 15], [155, 188, 15]];
+        else if (palette === 'cga') paletteColors = [[0,0,0], [0,0,170], [0,170,0], [0,170,170], [170,0,0], [170,0,170], [170,85,0], [170,170,170], [85,85,85], [85,85,255], [85,255,85], [85,255,255], [255,85,85], [255,85,255], [255,255,85], [255,255,255]];
+        else if (palette === 'sepia') paletteColors = [[46, 30, 15], [92, 60, 30], [138, 90, 45], [184, 120, 60], [230, 150, 75]];
+        else if (palette === 'grayscale') paletteColors = [[0,0,0], [64,64,64], [128,128,128], [192,192,192], [255,255,255]];
+        else if (palette === 'cyberpunk') paletteColors = [[10, 10, 20], [255, 0, 128], [0, 255, 255], [255, 255, 0], [128, 0, 255]];
+        else if (palette === 'custom' && customPalette && customPalette.length > 0) {
+           paletteColors = customPalette.map(hex => {
+             const r = parseInt(hex.substring(1, 3), 16);
+             const g = parseInt(hex.substring(3, 5), 16);
+             const b = parseInt(hex.substring(5, 7), 16);
+             return [r, g, b];
+           });
+        }
+      }
+
+      for (let y = 0; y < rows; y++) {
+        let lineText = '';
         for (let x = 0; x < cols; x++) {
           const posX = x * resolution;
           const posY = y * resolution * 2;
           
           let r = 0, g = 0, b = 0, count = 0;
           
-          // Sample block
+          // Sample
           for (let by = 0; by < resolution * 2 && posY + by < height; by++) {
             for (let bx = 0; bx < resolution && posX + bx < width; bx++) {
               const idx = ((posY + by) * width + (posX + bx)) * 4;
@@ -648,89 +714,43 @@
             }
           }
           
-          if (count > 0) {
-            r = Math.floor(r / count);
-            g = Math.floor(g / count);
-            b = Math.floor(b / count);
+          if (count > 0) { r /= count; g /= count; b /= count; }
+
+          // Filters
+          [r, g, b] = adjustColor(r, g, b);
+          
+          // Theme
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          [r, g, b] = applyTheme(r, g, b, gray);
+
+          // Palette
+          if (paletteColors) {
+            [r, g, b] = quantize(r, g, b, paletteColors);
           }
 
-          // Apply filters
-          [r, g, b] = adjustColor(r, g, b, contrast, brightness, saturation, sepia, hue);
-          
-          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          // Char
           let charIdx = Math.floor((gray / 255) * (chars.length - 1));
-          
           if (invert) charIdx = chars.length - 1 - charIdx;
           
-          const char = chars[charIdx] || ' ';
-          const safeChar = char.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          // Pack into buffer: [Alpha(unused)][Blue][Green][Red] (Little Endian usually)
+          // Actually we need to store CharIndex too.
+          // Let's use: Bits 0-7: CharIndex, 8-15: R, 16-23: G, 24-31: B
+          const packed = (charIdx & 0xFF) | ((Math.floor(r) & 0xFF) << 8) | ((Math.floor(g) & 0xFF) << 16) | ((Math.floor(b) & 0xFF) << 24);
+          buffer[y * cols + x] = packed;
           
-          // Apply Theme Colors
-          let finalR = r, finalG = g, finalB = b;
-          
-          if (theme === 'monochrome') {
-            finalR = 255; finalG = 255; finalB = 255;
-          } else if (theme === 'red') {
-             finalR = gray; finalG = 0; finalB = 0;
-          } else if (theme === 'green') {
-             finalR = 0; finalG = gray; finalB = 0;
-          } else if (theme === 'blue') {
-             finalR = 0; finalG = 0; finalB = gray;
-          } else if (theme === 'custom') {
-             // Parse hex customThemeColor
-             const hex = customThemeColor.replace('#', '');
-             const tr = parseInt(hex.substring(0, 2), 16);
-             const tg = parseInt(hex.substring(2, 4), 16);
-             const tb = parseInt(hex.substring(4, 6), 16);
-             
-             // Tint based on grayscale intensity
-             finalR = (tr * gray) / 255;
-             finalG = (tg * gray) / 255;
-             finalB = (tb * gray) / 255;
-          } else if (theme === 'gameboy') {
-             // 4 colors: #0f380f (darkest), #306230, #8bac0f, #9bbc0f (lightest)
-             // 15, 56, 15 | 48, 98, 48 | 139, 172, 15 | 155, 188, 15
-             if (gray < 64) { finalR = 15; finalG = 56; finalB = 15; }
-             else if (gray < 128) { finalR = 48; finalG = 98; finalB = 48; }
-             else if (gray < 192) { finalR = 139; finalG = 172; finalB = 15; }
-             else { finalR = 155; finalG = 188; finalB = 15; }
-          } else if (theme === 'neon') {
-             // Map gray to a neon gradient: Blue -> Pink -> Yellow
-             if (gray < 85) { // Deep Blue/Purple
-                finalR = (gray * 3); finalG = 0; finalB = 255;
-             } else if (gray < 170) { // Pink/Magenta
-                finalR = 255; finalG = 0; finalB = 255 - ((gray - 85) * 3);
-             } else { // Yellow/White
-                finalR = 255; finalG = (gray - 170) * 3; finalB = 0;
-             }
-          } else if (theme === 'crystals') {
-             // Purple -> Cyan -> White
-             if (gray < 128) {
-                finalR = (gray * 2); finalG = 0; finalB = 255;
-             } else {
-                finalR = 255 - (gray - 128); finalG = (gray - 128) * 2; finalB = 255;
-             }
-          }
-          
-          if (theme !== 'monochrome') {
-            lineHtml += `<span style="color: rgb(${Math.floor(finalR)},${Math.floor(finalG)},${Math.floor(finalB)})">${safeChar}</span>`;
-          } else {
-            lineHtml += safeChar;
-          }
-          lineText += char;
+          lineText += chars[charIdx] || ' ';
         }
-        output += lineHtml + '\n';
         rawText += lineText + '\n';
       }
       
-      self.postMessage({ html: output, text: rawText, cols, rows });
+      self.postMessage({ buffer, rawText, cols, rows }, [buffer.buffer]);
     };
   </script>
 
   <script>
-    // --- App State & Refs ---
+    // --- App State ---
     const state = {
-      source: 'image', // image, camera, video
+      source: 'image',
       resolution: 6,
       charSet: 'standard',
       customChars: '',
@@ -739,14 +759,12 @@
       brightness: 0,
       saturation: 100,
       sepia: 0,
-      blur: 0,
       hue: 0,
       theme: 'original',
       customThemeColor: '#ff00ff',
+      palette: 'none',
+      customPalette: ['#ff0000', '#00ff00', '#0000ff'], // Default custom colors
       zoom: 1,
-      isPlaying: false,
-      rafId: null,
-      // Text Mode
       text: '',
       fontFamily: 'Inter',
       fontSize: 60
@@ -759,190 +777,155 @@
       numbers: " 1234567890",
       letters: " abcdefghijklmnopqrstuvwxyz",
       blocks: " ░▒▓█",
-      binary: " 01",
       matrix: " 01",
-      smileys: " ☺☻",
-      geometric: " ○◔◑◕●",
-      arrows: " ↑↗→↘↓↙←↖",
-      braille: " ⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿",
-      morse: " .-",
-      katakana: " アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン",
+      custom: ""
     };
 
-    // DOM Elements
+    // --- DOM ---
     const els = {
-      dropZone: document.getElementById('dropZone'),
-      fileInput: document.getElementById('fileInput'),
-      videoInput: document.getElementById('videoInput'),
-      asciiOutput: document.getElementById('asciiOutput'),
+      sidebar: document.getElementById('sidebar'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      btnMenu: document.getElementById('btnMenu'),
+      outputCanvas: document.getElementById('outputCanvas'),
       outputWrapper: document.getElementById('outputWrapper'),
       emptyState: document.getElementById('emptyState'),
-      webcamVideo: document.getElementById('webcamVideo'),
-      uploadedVideo: document.getElementById('uploadedVideo'),
       loader: document.getElementById('loader'),
       toast: document.getElementById('toast'),
       statDims: document.getElementById('statDims'),
-      statFps: document.getElementById('statFps'),
 
       // Inputs
+      fileInput: document.getElementById('fileInput'),
+      videoInput: document.getElementById('videoInput'),
+      webcamVideo: document.getElementById('webcamVideo'),
+      uploadedVideo: document.getElementById('uploadedVideo'),
+
+      // Controls
       inpRes: document.getElementById('inpRes'),
       valRes: document.getElementById('valRes'),
       selCharSet: document.getElementById('selCharSet'),
-      charPreview: document.getElementById('charPreview'),
       inpCustomChars: document.getElementById('inpCustomChars'),
       chkInvert: document.getElementById('chkInvert'),
+
       inpContrast: document.getElementById('inpContrast'),
       valContrast: document.getElementById('valContrast'),
       inpBrightness: document.getElementById('inpBrightness'),
       valBrightness: document.getElementById('valBrightness'),
       inpSaturation: document.getElementById('inpSaturation'),
       valSaturation: document.getElementById('valSaturation'),
-      inpSepia: document.getElementById('inpSepia'),
-      valSepia: document.getElementById('valSepia'),
-      inpBlur: document.getElementById('inpBlur'),
-      valBlur: document.getElementById('valBlur'),
-      inpHue: document.getElementById('inpHue'),
-      valHue: document.getElementById('valHue'),
+
       selTheme: document.getElementById('selTheme'),
-      inpThemeColor: document.getElementById('inpThemeColor'),
       customThemeColorContainer: document.getElementById('customThemeColorContainer'),
+      inpThemeColor: document.getElementById('inpThemeColor'),
 
-      // Video Controls
-      videoControls: document.getElementById('videoControls'),
-      btnVidToggle: document.getElementById('btnVidToggle'),
-      vidProgress: document.getElementById('vidProgress'),
-      vidTime: document.getElementById('vidTime'),
-      btnVidMute: document.getElementById('btnVidMute'),
-      vidVolume: document.getElementById('vidVolume'),
+      selPalette: document.getElementById('selPalette'),
+      customPaletteEditor: document.getElementById('customPaletteEditor'),
+      btnAddPaletteColor: document.getElementById('btnAddPaletteColor'),
 
-      // Tabs
-      tabImage: document.getElementById('tabImage'),
-      tabCamera: document.getElementById('tabCamera'),
-      tabVideo: document.getElementById('tabVideo'),
-      tabText: document.getElementById('tabText'),
-      panelImage: document.getElementById('panelImage'),
-      panelCamera: document.getElementById('panelCamera'),
-      panelVideo: document.getElementById('panelVideo'),
-      panelText: document.getElementById('panelText'),
-
-      // Text Inputs
-      inpText: document.getElementById('inpText'),
-      selFont: document.getElementById('selFont'),
-      inpFontSize: document.getElementById('inpFontSize'),
-
-      statusBar: document.getElementById('statusBar')
+      // Text View
+      textModal: document.getElementById('textModal'),
+      textOutput: document.getElementById('textOutput'),
+      btnViewText: document.getElementById('btnViewText'),
+      btnCloseText: document.getElementById('btnCloseText'),
+      btnCopyText: document.getElementById('btnCopyText'),
     };
 
-    // Worker Setup
+    // --- Worker ---
     const workerBlob = new Blob([document.getElementById('workerScript').textContent], { type: 'text/javascript' });
     const worker = new Worker(URL.createObjectURL(workerBlob));
 
-    let currentImage = null; // Image object or Video element
+    // --- Globals ---
+    let currentImage = null;
     let lastLoadedImage = null;
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let canvasCtx = els.outputCanvas.getContext('2d');
     let isGenerating = false;
     let lastRawText = '';
+    let rafId = null;
 
-    // --- Initialization ---
+    // --- Init ---
     function init() {
       setupEventListeners();
       setupTabs();
-      updateZoom();
-      updateCharPreview();
+      renderCustomPaletteUI();
     }
 
     function setupEventListeners() {
-      // Inputs
+      // Mobile Menu
+      els.btnMenu.addEventListener('click', () => {
+        els.sidebar.classList.add('open');
+        els.sidebarOverlay.classList.add('open');
+      });
+      els.sidebarOverlay.addEventListener('click', () => {
+        els.sidebar.classList.remove('open');
+        els.sidebarOverlay.classList.remove('open');
+      });
+
+      // Resolution
       els.inpRes.addEventListener('input', e => {
         state.resolution = parseInt(e.target.value);
         els.valRes.textContent = state.resolution + 'px';
         triggerGenerate();
       });
 
+      // Charset
       els.selCharSet.addEventListener('change', e => {
         state.charSet = e.target.value;
         els.inpCustomChars.classList.toggle('hidden', state.charSet !== 'custom');
-        updateCharPreview();
         triggerGenerate();
       });
-
       els.inpCustomChars.addEventListener('input', e => {
         state.customChars = e.target.value;
-        updateCharPreview();
         triggerGenerate();
       });
 
+      // Invert
       els.chkInvert.addEventListener('change', e => {
         state.invert = e.target.checked;
-        updateCharPreview();
         triggerGenerate();
       });
 
+      // Adjustments
       els.inpContrast.addEventListener('input', e => {
         state.contrast = parseInt(e.target.value);
         els.valContrast.textContent = state.contrast;
         triggerGenerate();
       });
-
       els.inpBrightness.addEventListener('input', e => {
         state.brightness = parseInt(e.target.value);
         els.valBrightness.textContent = state.brightness;
         triggerGenerate();
       });
-
       els.inpSaturation.addEventListener('input', e => {
         state.saturation = parseInt(e.target.value);
         els.valSaturation.textContent = state.saturation + '%';
         triggerGenerate();
       });
 
-      els.inpSepia.addEventListener('input', e => {
-        state.sepia = parseInt(e.target.value);
-        els.valSepia.textContent = state.sepia + '%';
-        triggerGenerate();
-      });
-
-      els.inpBlur.addEventListener('input', e => {
-        state.blur = parseInt(e.target.value);
-        els.valBlur.textContent = state.blur + 'px';
-        triggerGenerate();
-      });
-
-      els.inpHue.addEventListener('input', e => {
-        state.hue = parseInt(e.target.value);
-        els.valHue.textContent = state.hue + '°';
-        triggerGenerate();
-      });
-
+      // Theme
       els.selTheme.addEventListener('change', e => {
         state.theme = e.target.value;
         els.customThemeColorContainer.classList.toggle('hidden', state.theme !== 'custom');
         triggerGenerate();
       });
-
       els.inpThemeColor.addEventListener('input', e => {
         state.customThemeColor = e.target.value;
         triggerGenerate();
       });
 
-      // Text Mode Listeners
-      els.inpText.addEventListener('input', e => {
-        state.text = e.target.value;
+      // Palette
+      els.selPalette.addEventListener('change', e => {
+        state.palette = e.target.value;
+        els.customPaletteEditor.classList.toggle('hidden', state.palette !== 'custom');
         triggerGenerate();
       });
-      els.selFont.addEventListener('change', e => {
-        state.fontFamily = e.target.value;
-        triggerGenerate();
-      });
-      els.inpFontSize.addEventListener('input', e => {
-        state.fontSize = parseInt(e.target.value);
+      els.btnAddPaletteColor.addEventListener('click', () => {
+        state.customPalette.push('#ffffff');
+        renderCustomPaletteUI();
         triggerGenerate();
       });
 
       // Zoom
       document.getElementById('zoomIn').addEventListener('click', () => {
-        state.zoom = Math.min(10, state.zoom + 0.1);
+        state.zoom = Math.min(5, state.zoom + 0.1);
         updateZoom();
       });
       document.getElementById('zoomOut').addEventListener('click', () => {
@@ -950,105 +933,88 @@
         updateZoom();
       });
 
-      // File Upload
-      els.dropZone.addEventListener('click', () => els.fileInput.click());
+      // File Inputs
+      document.getElementById('dropZone').addEventListener('click', () => els.fileInput.click());
       els.fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-      els.dropZone.addEventListener('dragover', e => {
-        e.preventDefault();
-        els.dropZone.classList.add('active');
+      // Text View
+      els.btnViewText.addEventListener('click', () => {
+        els.textOutput.value = lastRawText;
+        els.textModal.classList.remove('hidden');
       });
-      els.dropZone.addEventListener('dragleave', () => els.dropZone.classList.remove('active'));
-      els.dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        els.dropZone.classList.remove('active');
-        handleFile(e.dataTransfer.files[0]);
-      });
-
-      // Video Upload
-      els.videoInput.addEventListener('change', e => handleVideoFile(e.target.files[0]));
-      document.querySelector('#panelVideo .drop-zone').addEventListener('click', () => els.videoInput.click());
-
-      // Video Controls Events
-      els.btnVidToggle.addEventListener('click', () => {
-        if (els.uploadedVideo.paused) {
-          els.uploadedVideo.play();
-          els.btnVidToggle.textContent = 'Pause';
-        } else {
-          els.uploadedVideo.pause();
-          els.btnVidToggle.textContent = 'Play';
-        }
+      els.btnCloseText.addEventListener('click', () => els.textModal.classList.add('hidden'));
+      document.getElementById('textModalBg').addEventListener('click', () => els.textModal.classList.add('hidden'));
+      els.btnCopyText.addEventListener('click', () => {
+        els.textOutput.select();
+        document.execCommand('copy');
+        showToast('Copied!');
       });
 
-      els.vidProgress.addEventListener('input', e => {
-        const time = (e.target.value / 100) * els.uploadedVideo.duration;
-        els.uploadedVideo.currentTime = time;
-      });
-
-      els.btnVidMute.addEventListener('click', () => {
-        els.uploadedVideo.muted = !els.uploadedVideo.muted;
-        els.btnVidMute.textContent = els.uploadedVideo.muted ? 'Unmute' : 'Mute';
-      });
-
-      els.vidVolume.addEventListener('input', e => {
-        els.uploadedVideo.volume = e.target.value;
-      });
-
-      els.uploadedVideo.addEventListener('timeupdate', () => {
-        if (!els.uploadedVideo.duration) return;
-        const pct = (els.uploadedVideo.currentTime / els.uploadedVideo.duration) * 100;
-        els.vidProgress.value = pct;
-
-        const cur = formatTime(els.uploadedVideo.currentTime);
-        const dur = formatTime(els.uploadedVideo.duration);
-        els.vidTime.textContent = `${cur} / ${dur}`;
-      });
-
-      els.uploadedVideo.addEventListener('ended', () => {
-        els.btnVidToggle.textContent = 'Play';
-      });
-
-      // Ensure loop starts if video plays (e.g. via controls)
-      els.uploadedVideo.addEventListener('play', () => {
-        if (!isGenerating) processFrame();
+      // PNG Export
+      document.getElementById('btnDownloadPng').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'ascii-art.png';
+        link.href = els.outputCanvas.toDataURL();
+        link.click();
+        showToast('PNG Saved');
       });
 
       // Camera
       document.getElementById('btnToggleCam').addEventListener('click', toggleCamera);
 
+      // Video
+      document.querySelector('#panelVideo .drop-zone').addEventListener('click', () => document.getElementById('videoInput').click());
+      document.getElementById('videoInput').addEventListener('change', e => handleVideoFile(e.target.files[0]));
+      document.getElementById('btnVidToggle').addEventListener('click', () => {
+        const vid = els.uploadedVideo;
+        if (vid.paused) { vid.play(); document.getElementById('btnVidToggle').textContent = 'Pause'; }
+        else { vid.pause(); document.getElementById('btnVidToggle').textContent = 'Play'; }
+      });
+
       // Worker Message
       worker.onmessage = e => {
-        const { html, text, cols, rows } = e.data;
-        els.asciiOutput.innerHTML = html;
-        lastRawText = text;
+        const { buffer, rawText, cols, rows } = e.data;
+        lastRawText = rawText;
+        renderCanvas(buffer, cols, rows);
         els.statDims.textContent = `${cols} x ${rows}`;
         isGenerating = false;
         els.emptyState.classList.add('hidden');
         els.loader.classList.add('hidden');
-
-        if (state.source === 'video' || state.source === 'camera') {
-          requestAnimationFrame(processFrame);
-        }
-        updateStatus('Ready');
+        if (state.source === 'video' || state.source === 'camera') requestAnimationFrame(processFrame);
       };
+    }
 
-      // Theme
-      document.getElementById('themeToggle').addEventListener('click', () => {
-        const body = document.body;
-        const isDark = body.getAttribute('data-theme') !== 'light';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      });
+    function renderCustomPaletteUI() {
+      // Clear existing colors (except add button)
+      const children = Array.from(els.customPaletteEditor.children);
+      children.forEach(c => { if (c.id !== 'btnAddPaletteColor') c.remove(); });
 
-      // Export
-      document.getElementById('btnCopy').addEventListener('click', () => {
-        navigator.clipboard.writeText(lastRawText).then(() => showToast('Copied to clipboard!'));
+      state.customPalette.forEach((color, idx) => {
+        const div = document.createElement('div');
+        div.className = 'relative group';
+
+        const input = document.createElement('input');
+        input.type = 'color';
+        input.value = color;
+        input.className = 'w-6 h-6 rounded-full cursor-pointer border-none p-0 overflow-hidden';
+        input.addEventListener('input', e => {
+          state.customPalette[idx] = e.target.value;
+          triggerGenerate();
+        });
+
+        const del = document.createElement('button');
+        del.innerHTML = '×';
+        del.className = 'absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white text-[8px] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition';
+        del.addEventListener('click', () => {
+          state.customPalette.splice(idx, 1);
+          renderCustomPaletteUI();
+          triggerGenerate();
+        });
+
+        div.appendChild(input);
+        div.appendChild(del);
+        els.customPaletteEditor.insertBefore(div, els.btnAddPaletteColor);
       });
-      document.getElementById('btnDownloadTxt').addEventListener('click', () => download(lastRawText, 'ascii.txt', 'text/plain'));
-      document.getElementById('btnDownloadHtml').addEventListener('click', () => {
-        const html = `<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:monospace;white-space:pre;line-height:0.85">${els.asciiOutput.innerHTML}</body></html>`;
-        download(html, 'ascii.html', 'text/html');
-      });
-      document.getElementById('btnDownloadPng').addEventListener('click', exportPng);
     }
 
     function setupTabs() {
@@ -1056,29 +1022,24 @@
       tabs.forEach(t => {
         const btn = document.getElementById(`tab${t}`);
         btn.addEventListener('click', () => {
-          // Reset UI
           tabs.forEach(x => {
-            document.getElementById(`tab${x}`).className = 'flex-1 btn btn-secondary text-xs';
+            document.getElementById(`tab${x}`).className = 'btn btn-secondary text-[10px] px-1 py-2';
             document.getElementById(`panel${x}`).classList.add('hidden');
           });
-          btn.className = 'flex-1 btn btn-primary text-xs';
+          btn.className = 'btn btn-primary text-[10px] px-1 py-2';
           document.getElementById(`panel${t}`).classList.remove('hidden');
 
-          // Stop previous
           stopMedia();
           state.source = t.toLowerCase();
 
-          // Restore currentImage based on source
           if (state.source === 'image') {
             currentImage = lastLoadedImage;
             if (currentImage) triggerGenerate();
           } else if (state.source === 'video') {
             currentImage = els.uploadedVideo;
-            // Don't auto-play, but trigger once to show frame if loaded
-            if (els.uploadedVideo.readyState >= 2) triggerGenerate();
+            if (currentImage.readyState >= 2) triggerGenerate();
           } else if (state.source === 'camera') {
             currentImage = els.webcamVideo;
-            // Camera needs explicit start
           } else if (state.source === 'text') {
             triggerGenerate();
           }
@@ -1086,11 +1047,8 @@
       });
     }
 
-    // --- Logic ---
-
     function handleFile(file) {
-      if (!file || !file.type.startsWith('image/')) return showToast('Invalid image file', 'error');
-
+      if (!file) return;
       const reader = new FileReader();
       reader.onload = e => {
         const img = new Image();
@@ -1105,42 +1063,28 @@
     }
 
     function handleVideoFile(file) {
-      if (!file || !file.type.startsWith('video/')) return showToast('Invalid video file', 'error');
-
+      if (!file) return;
       const url = URL.createObjectURL(file);
       els.uploadedVideo.src = url;
-      // Don't show the video element, just show controls
-      els.videoControls.classList.remove('hidden');
+      document.getElementById('videoControls').classList.remove('hidden');
       currentImage = els.uploadedVideo;
-
-      els.uploadedVideo.play().then(() => {
-        els.btnVidToggle.textContent = 'Pause';
-      }).catch(e => console.error(e));
-
+      els.uploadedVideo.play();
       processFrame();
     }
 
-    function formatTime(s) {
-      const m = Math.floor(s / 60);
-      const sec = Math.floor(s % 60);
-      return `${m}:${sec.toString().padStart(2, '0')}`;
-    }
-
     async function toggleCamera() {
-      const btn = document.getElementById('btnToggleCam');
-      if (state.rafId) {
+      if (rafId) {
         stopMedia();
-        btn.textContent = 'Start Camera';
+        document.getElementById('btnToggleCam').textContent = 'Start Camera';
         document.getElementById('camPlaceholder').classList.remove('hidden');
         return;
       }
-
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
         els.webcamVideo.srcObject = stream;
         currentImage = els.webcamVideo;
-        state.rafId = true; // Flag to indicate active
-        btn.textContent = 'Stop Camera';
+        rafId = true;
+        document.getElementById('btnToggleCam').textContent = 'Stop Camera';
         document.getElementById('camPlaceholder').classList.add('hidden');
         processFrame();
       } catch (e) {
@@ -1155,131 +1099,112 @@
       }
       if (els.uploadedVideo.src) {
         els.uploadedVideo.pause();
-        els.btnVidToggle.textContent = 'Play';
       }
-      state.rafId = null;
+      rafId = null;
     }
 
     function triggerGenerate() {
-      if (state.source === 'text') {
-        processFrame();
-        return;
-      }
-      if (!currentImage) return;
-      if (state.source === 'image') {
-        processFrame();
-      }
+      if (state.source === 'text' || currentImage) processFrame();
     }
 
     function processFrame() {
-      if (state.source !== 'text' && !currentImage) return;
-      if (isGenerating && state.source !== 'image' && state.source !== 'text') return; // Skip frame if busy
+      if (isGenerating) return;
 
-      updateStatus('Processing...');
-
-      // Draw to canvas
+      // Prepare Image Data
+      const offCanvas = document.createElement('canvas');
+      const ctx = offCanvas.getContext('2d');
       let w, h;
 
-      // Apply Blur (Canvas API)
-      ctx.filter = state.blur > 0 ? `blur(${state.blur}px)` : 'none';
-
       if (state.source === 'text') {
-        // Render text to temp canvas
-        const textCanvas = document.createElement('canvas');
-        const tCtx = textCanvas.getContext('2d');
-
-        // Measure
-        tCtx.font = `${state.fontSize}px "${state.fontFamily}"`;
-        const lines = state.text.split('\n');
-        const lineHeight = state.fontSize * 1.2;
-        const maxLineWidth = lines.reduce((max, line) => Math.max(max, tCtx.measureText(line).width), 0);
-
-        w = Math.max(200, maxLineWidth + 40);
-        h = Math.max(100, (lines.length * lineHeight) + 40);
-
-        textCanvas.width = w;
-        textCanvas.height = h;
-
-        // Draw
-        tCtx.fillStyle = '#ffffff'; // White bg
-        tCtx.fillRect(0, 0, w, h);
-        tCtx.fillStyle = '#000000'; // Black text
-        tCtx.font = `${state.fontSize}px "${state.fontFamily}"`;
-        tCtx.textBaseline = 'top';
-
-        lines.forEach((line, i) => {
-          tCtx.fillText(line, 20, 20 + (i * lineHeight));
-        });
-
-        // Copy to main canvas
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-        }
-        ctx.drawImage(textCanvas, 0, 0);
-
+        // Render text to canvas
+        ctx.font = `${state.fontSize}px "${state.fontFamily}"`;
+        const lines = document.getElementById('inpText').value.split('\n');
+        const lh = state.fontSize * 1.2;
+        const mw = lines.reduce((max, l) => Math.max(max, ctx.measureText(l).width), 0);
+        w = Math.max(200, mw + 40);
+        h = Math.max(100, (lines.length * lh) + 40);
+        offCanvas.width = w; offCanvas.height = h;
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#000'; ctx.font = `${state.fontSize}px "${state.fontFamily}"`; ctx.textBaseline = 'top';
+        lines.forEach((l, i) => ctx.fillText(l, 20, 20 + i * lh));
       } else {
+        if (!currentImage) return;
         w = currentImage.videoWidth || currentImage.width;
         h = currentImage.videoHeight || currentImage.height;
-
-        if (!w || !h) {
-          if (state.source !== 'image') requestAnimationFrame(processFrame);
-          return;
-        }
-
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-        }
-
+        if (!w || !h) { requestAnimationFrame(processFrame); return; }
+        offCanvas.width = w; offCanvas.height = h;
         ctx.drawImage(currentImage, 0, 0, w, h);
       }
 
       const imageData = ctx.getImageData(0, 0, w, h);
-
-      // Prepare options
       const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
-      const options = {
-        resolution: state.resolution,
-        chars: chars || charSets.standard,
-        invert: state.invert,
-        contrast: state.contrast,
-        brightness: state.brightness,
-        saturation: state.saturation,
-        sepia: state.sepia,
-        hue: state.hue,
-        theme: state.theme,
-        customThemeColor: state.customThemeColor
-      };
 
       isGenerating = true;
       worker.postMessage({
         imageData: imageData.data,
         width: w,
         height: h,
-        options
+        options: {
+          resolution: state.resolution,
+          chars: chars || charSets.standard,
+          invert: state.invert,
+          contrast: state.contrast,
+          brightness: state.brightness,
+          saturation: state.saturation,
+          sepia: state.sepia,
+          hue: state.hue,
+          theme: state.theme,
+          customThemeColor: state.customThemeColor,
+          palette: state.palette,
+          customPalette: state.customPalette
+        }
       });
     }
 
-    function updateCharPreview() {
-      let chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
-      if (!chars) chars = charSets.standard;
+    function renderCanvas(buffer, cols, rows) {
+      // Setup Canvas
+      const charW = 8; // Approx width of char at 10px font
+      const charH = 12; // Approx height
+      const width = cols * charW;
+      const height = rows * charH;
 
-      // Show preview respecting invert
-      let displayChars = chars.split('');
-      if (state.invert) displayChars.reverse();
+      if (els.outputCanvas.width !== width || els.outputCanvas.height !== height) {
+        els.outputCanvas.width = width;
+        els.outputCanvas.height = height;
+      }
 
-      els.charPreview.textContent = displayChars.join('');
+      const ctx = canvasCtx;
+      const isDark = document.body.getAttribute('data-theme') !== 'light';
+
+      // Clear
+      ctx.fillStyle = isDark ? '#09090b' : '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+
+      // Font
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.textBaseline = 'top';
+
+      const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
+      const charList = (chars || charSets.standard).split('');
+
+      for (let i = 0; i < buffer.length; i++) {
+        const packed = buffer[i];
+        const charIdx = packed & 0xFF;
+        const r = (packed >> 8) & 0xFF;
+        const g = (packed >> 16) & 0xFF;
+        const b = (packed >> 24) & 0xFF;
+
+        const x = (i % cols) * charW;
+        const y = Math.floor(i / cols) * charH;
+
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillText(charList[charIdx] || ' ', x, y);
+      }
     }
 
     function updateZoom() {
       document.getElementById('zoomVal').textContent = Math.round(state.zoom * 100) + '%';
       els.outputWrapper.style.transform = `scale(${state.zoom})`;
-    }
-
-    function updateStatus(msg) {
-      els.statusBar.textContent = msg;
-      els.statusBar.style.opacity = msg === 'Ready' ? '0.5' : '1';
     }
 
     function showToast(msg, type = 'success') {
@@ -1289,104 +1214,8 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    function download(content, name, type) {
-      const blob = new Blob([content], { type });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('Downloaded ' + name);
-    }
-
-    function exportPng() {
-      if (!els.asciiOutput.textContent.trim()) return showToast('No output to export', 'warning');
-
-      showToast('Generating PNG...', 'success');
-
-      setTimeout(() => {
-        try {
-          const lines = lastRawText.split('\n');
-          if (lines[lines.length - 1] === '') lines.pop();
-
-          const fontSize = 12;
-          const lineHeight = 10;
-          const font = '12px "JetBrains Mono", monospace';
-
-          const tmpCanvas = document.createElement('canvas');
-          const tmpCtx = tmpCanvas.getContext('2d');
-          tmpCtx.font = font;
-          const charWidth = tmpCtx.measureText('M').width;
-
-          const cols = lines.reduce((max, line) => Math.max(max, line.length), 0);
-          const width = Math.ceil(cols * charWidth) + 40;
-          const height = Math.ceil(lines.length * lineHeight) + 40;
-
-          const cvs = document.createElement('canvas');
-          cvs.width = width;
-          cvs.height = height;
-          const c = cvs.getContext('2d');
-
-          const isDark = document.body.getAttribute('data-theme') !== 'light';
-          c.fillStyle = isDark ? '#09090b' : '#ffffff';
-          c.fillRect(0, 0, width, height);
-
-          c.textBaseline = 'top';
-          c.font = font;
-
-          if (state.theme === 'monochrome') {
-            c.fillStyle = isDark ? '#f4f4f5' : '#18181b';
-            lines.forEach((line, i) => {
-              c.fillText(line, 20, 20 + (i * lineHeight));
-            });
-          } else {
-            let y = 20;
-            const lineNodes = els.asciiOutput.innerHTML.split('\n');
-
-            lineNodes.forEach(lineHtml => {
-              if (!lineHtml) return;
-              let x = 20;
-              const div = document.createElement('div');
-              div.innerHTML = lineHtml;
-
-              div.childNodes.forEach(node => {
-                if (node.nodeType === 3) {
-                  // Text node (shouldn't happen much in colored mode but fallback)
-                  c.fillStyle = isDark ? '#f4f4f5' : '#18181b';
-                  c.fillText(node.textContent, x, y);
-                  x += node.textContent.length * charWidth;
-                } else if (node.nodeType === 1) {
-                  // Span with color
-                  c.fillStyle = node.style.color || (isDark ? '#f4f4f5' : '#18181b');
-                  c.fillText(node.textContent, x, y);
-                  x += node.textContent.length * charWidth;
-                }
-              });
-              y += lineHeight;
-            });
-          }
-
-          cvs.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ascii-art.png';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('PNG Saved!');
-          });
-
-        } catch (e) {
-          console.error(e);
-          showToast('Export failed', 'error');
-        }
-      }, 50);
-    }
-
     // Init
     init();
-
   </script>
 </body>
 
