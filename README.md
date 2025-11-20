@@ -22,4 +22,4 @@ A clean little tool that turns images, videos, text, andyour webcam into ASCII a
 - Web Worker for fast ASCII generation  
 - Canvas for frame processing
 
-Simple tool. Works clean. Enjoy. :)
+Simple tool. Works (mostly) clean. Enjoy. :)
