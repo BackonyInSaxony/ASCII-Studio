@@ -408,6 +408,26 @@
               placeholder="Enter chars..." />
           </div>
 
+          <!-- Theme -->
+          <div id="grpTheme">
+            <label class="text-xs font-medium mb-1 block">Theme</label>
+            <select id="selTheme" class="select-input text-sm mb-2">
+              <option value="original" selected>Original (Color)</option>
+              <option value="monochrome">Monochrome</option>
+              <option value="red">Red Matrix</option>
+              <option value="green">Hacker Green</option>
+              <option value="blue">Cyber Blue</option>
+              <option value="custom">Custom Color</option>
+              <option value="gameboy">Gameboy</option>
+              <option value="neon">Neon Nights</option>
+              <option value="crystals">Crystals</option>
+            </select>
+            <div id="customThemeColorContainer" class="hidden flex items-center gap-2">
+              <input type="color" id="inpThemeColor" value="#ff00ff"
+                class="h-8 w-full cursor-pointer rounded border border-[var(--border)] bg-[var(--bg-primary)] p-1">
+            </div>
+          </div>
+
           <!-- Invert -->
           <div class="flex items-center justify-between" id="grpInvert">
             <label class="text-xs font-medium">Invert Characters</label>
@@ -493,10 +513,6 @@
           <span id="statFps" class="text-xs font-mono text-[var(--text-secondary)] hidden">0 FPS</span>
         </div>
         <div class="flex items-center gap-2">
-          <label class="flex items-center gap-2 text-xs cursor-pointer">
-            <input type="checkbox" id="chkColor" checked class="rounded border-[var(--border)]">
-            <span>Color</span>
-          </label>
           <div class="h-4 w-px bg-[var(--border)] mx-1"></div>
           <div class="flex gap-1">
             <button id="zoomOut" class="p-1 hover:bg-[var(--bg-primary)] rounded" title="Zoom Out">-</button>
@@ -540,7 +556,7 @@
   <script id="workerScript" type="javascript/worker">
     self.onmessage = function(e) {
       const { imageData, width, height, options } = e.data;
-      const { resolution, chars, invert, contrast, brightness, saturation, sepia, hue, colorMode } = options;
+      const { resolution, chars, invert, contrast, brightness, saturation, sepia, hue, theme, customThemeColor } = options;
       
       // Helper to adjust color
       function adjustColor(r, g, b, contrast, brightness, saturation, sepia, hue) {
@@ -649,8 +665,55 @@
           const char = chars[charIdx] || ' ';
           const safeChar = char.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           
-          if (colorMode) {
-            lineHtml += `<span style="color: rgb(${Math.floor(r)},${Math.floor(g)},${Math.floor(b)})">${safeChar}</span>`;
+          // Apply Theme Colors
+          let finalR = r, finalG = g, finalB = b;
+          
+          if (theme === 'monochrome') {
+            finalR = 255; finalG = 255; finalB = 255;
+          } else if (theme === 'red') {
+             finalR = gray; finalG = 0; finalB = 0;
+          } else if (theme === 'green') {
+             finalR = 0; finalG = gray; finalB = 0;
+          } else if (theme === 'blue') {
+             finalR = 0; finalG = 0; finalB = gray;
+          } else if (theme === 'custom') {
+             // Parse hex customThemeColor
+             const hex = customThemeColor.replace('#', '');
+             const tr = parseInt(hex.substring(0, 2), 16);
+             const tg = parseInt(hex.substring(2, 4), 16);
+             const tb = parseInt(hex.substring(4, 6), 16);
+             
+             // Tint based on grayscale intensity
+             finalR = (tr * gray) / 255;
+             finalG = (tg * gray) / 255;
+             finalB = (tb * gray) / 255;
+          } else if (theme === 'gameboy') {
+             // 4 colors: #0f380f (darkest), #306230, #8bac0f, #9bbc0f (lightest)
+             // 15, 56, 15 | 48, 98, 48 | 139, 172, 15 | 155, 188, 15
+             if (gray < 64) { finalR = 15; finalG = 56; finalB = 15; }
+             else if (gray < 128) { finalR = 48; finalG = 98; finalB = 48; }
+             else if (gray < 192) { finalR = 139; finalG = 172; finalB = 15; }
+             else { finalR = 155; finalG = 188; finalB = 15; }
+          } else if (theme === 'neon') {
+             // Map gray to a neon gradient: Blue -> Pink -> Yellow
+             if (gray < 85) { // Deep Blue/Purple
+                finalR = (gray * 3); finalG = 0; finalB = 255;
+             } else if (gray < 170) { // Pink/Magenta
+                finalR = 255; finalG = 0; finalB = 255 - ((gray - 85) * 3);
+             } else { // Yellow/White
+                finalR = 255; finalG = (gray - 170) * 3; finalB = 0;
+             }
+          } else if (theme === 'crystals') {
+             // Purple -> Cyan -> White
+             if (gray < 128) {
+                finalR = (gray * 2); finalG = 0; finalB = 255;
+             } else {
+                finalR = 255 - (gray - 128); finalG = (gray - 128) * 2; finalB = 255;
+             }
+          }
+          
+          if (theme !== 'monochrome') {
+            lineHtml += `<span style="color: rgb(${Math.floor(finalR)},${Math.floor(finalG)},${Math.floor(finalB)})">${safeChar}</span>`;
           } else {
             lineHtml += safeChar;
           }
@@ -678,7 +741,8 @@
       sepia: 0,
       blur: 0,
       hue: 0,
-      color: true,
+      theme: 'original',
+      customThemeColor: '#ff00ff',
       zoom: 1,
       isPlaying: false,
       rafId: null,
@@ -739,7 +803,9 @@
       valBlur: document.getElementById('valBlur'),
       inpHue: document.getElementById('inpHue'),
       valHue: document.getElementById('valHue'),
-      chkColor: document.getElementById('chkColor'),
+      selTheme: document.getElementById('selTheme'),
+      inpThemeColor: document.getElementById('inpThemeColor'),
+      customThemeColorContainer: document.getElementById('customThemeColorContainer'),
 
       // Video Controls
       videoControls: document.getElementById('videoControls'),
@@ -849,8 +915,14 @@
         triggerGenerate();
       });
 
-      els.chkColor.addEventListener('change', e => {
-        state.color = e.target.checked;
+      els.selTheme.addEventListener('change', e => {
+        state.theme = e.target.value;
+        els.customThemeColorContainer.classList.toggle('hidden', state.theme !== 'custom');
+        triggerGenerate();
+      });
+
+      els.inpThemeColor.addEventListener('input', e => {
+        state.customThemeColor = e.target.value;
         triggerGenerate();
       });
 
@@ -1176,7 +1248,8 @@
         saturation: state.saturation,
         sepia: state.sepia,
         hue: state.hue,
-        colorMode: state.color
+        theme: state.theme,
+        customThemeColor: state.customThemeColor
       };
 
       isGenerating = true;
@@ -1262,7 +1335,7 @@
           c.textBaseline = 'top';
           c.font = font;
 
-          if (!state.color) {
+          if (state.theme === 'monochrome') {
             c.fillStyle = isDark ? '#f4f4f5' : '#18181b';
             lines.forEach((line, i) => {
               c.fillText(line, 20, 20 + (i * lineHeight));
@@ -1279,10 +1352,12 @@
 
               div.childNodes.forEach(node => {
                 if (node.nodeType === 3) {
+                  // Text node (shouldn't happen much in colored mode but fallback)
                   c.fillStyle = isDark ? '#f4f4f5' : '#18181b';
                   c.fillText(node.textContent, x, y);
                   x += node.textContent.length * charWidth;
                 } else if (node.nodeType === 1) {
+                  // Span with color
                   c.fillStyle = node.style.color || (isDark ? '#f4f4f5' : '#18181b');
                   c.fillText(node.textContent, x, y);
                   x += node.textContent.length * charWidth;
