@@ -2,569 +2,646 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Pro ASCII Art Studio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&family=Bangers&family=Creepster&family=VT323&family=Dancing+Script&family=Press+Start+2P&family=Lobster&family=Orbitron&family=Pacifico&display=swap"
-    rel="stylesheet">
-  <style>
-    :root {
-      --bg-primary: #09090b;
-      --bg-secondary: #18181b;
-      --bg-tertiary: #27272a;
-      --text-primary: #f4f4f5;
-      --text-secondary: #a1a1aa;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --border: #3f3f46;
-      --success: #10b981;
-      --error: #ef4444;
-      --warning: #f59e0b;
-    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Pro ASCII Art Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;800&family=Bangers&family=Creepster&family=VT323&family=Dancing+Script&family=Press+Start+2P&family=Lobster&family=Orbitron&family=Pacifico&family=Fira+Code&family=Source+Code+Pro&family=Inconsolata&family=Share+Tech+Mono&family=Cutive+Mono&family=Anonymous+Pro&family=Ubuntu+Mono&family=Space+Mono&family=Rubik+Mono+One&family=Doto:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --bg-tertiary: #27272a;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --border: #3f3f46;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
 
-    [data-theme="light"] {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f4f4f5;
-      --bg-tertiary: #e4e4e7;
-      --text-primary: #18181b;
-      --text-secondary: #52525b;
-      --accent: #4f46e5;
-      --accent-hover: #4338ca;
-      --border: #d4d4d8;
-    }
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f5;
+            --bg-tertiary: #e4e4e7;
+            --text-primary: #18181b;
+            --text-secondary: #52525b;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --border: #d4d4d8;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      transition: background-color 0.3s, color 0.3s;
-      overscroll-behavior: none;
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+            overscroll-behavior: none;
+        }
 
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
 
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 3px;
-    }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-secondary);
-    }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
 
-    /* UI Components */
-    .control-group {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1rem;
-      transition: border-color 0.2s;
-    }
+        /* UI Components */
+        .control-group {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: border-color 0.2s;
+        }
 
-    .control-group:hover {
-      border-color: var(--accent);
-    }
+        .control-group:hover {
+            border-color: var(--accent);
+        }
 
-    .btn {
-      padding: 0.6rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 500;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-size: 0.875rem;
-      user-select: none;
-    }
+        .btn {
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            user-select: none;
+        }
 
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-    }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
 
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px);
-    }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
 
-    .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-    }
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
 
-    .btn-secondary:hover {
-      background: var(--border);
-    }
+        .btn-secondary:hover {
+            background: var(--border);
+        }
 
-    .btn:active {
-      transform: translateY(0);
-    }
+        .btn:active {
+            transform: translateY(0);
+        }
 
-    .input-range {
-      width: 100%;
-      height: 6px;
-      background: var(--bg-primary);
-      border-radius: 3px;
-      appearance: none;
-      outline: none;
-    }
+        .input-range {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            appearance: none;
+            outline: none;
+        }
 
-    .input-range::-webkit-slider-thumb {
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      background: var(--accent);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
+        .input-range::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
 
-    .input-range::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
+        .input-range::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
 
-    .select-input {
-      width: 100%;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      outline: none;
-      font-size: 0.875rem;
-    }
+        .select-input {
+            width: 100%;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            outline: none;
+            font-size: 0.875rem;
+        }
 
-    .select-input:focus {
-      border-color: var(--accent);
-    }
+        .select-input:focus {
+            border-color: var(--accent);
+        }
 
-    /* Drop Zone */
-    .drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: 1rem;
-      transition: all 0.2s;
-      background: rgba(255, 255, 255, 0.02);
-    }
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 1rem;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.02);
+        }
 
-    .drop-zone:hover,
-    .drop-zone.active {
-      border-color: var(--accent);
-      background: rgba(99, 102, 241, 0.1);
-    }
+        .drop-zone:hover,
+        .drop-zone.active {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+        }
 
-    /* Canvas Output */
-    #outputCanvas {
-      image-rendering: pixelated;
-      max-width: 100%;
-      max-height: 100%;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
+        /* Canvas Output */
+        #outputCanvas {
+            image-rendering: pixelated;
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
 
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      padding: 12px 24px;
-      border-radius: 8px;
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 60;
-    }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 60;
+        }
 
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
 
-    .toast.success {
-      border-left: 4px solid var(--success);
-    }
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
 
-    .toast.error {
-      border-left: 4px solid var(--error);
-    }
+        .toast.error {
+            border-left: 4px solid var(--error);
+        }
 
-    /* Mobile Sidebar */
-    .sidebar {
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+        /* Mobile Sidebar */
+        .sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    @media (max-width: 1024px) {
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        z-index: 50;
-        transform: translateX(-100%);
-        box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
-      }
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                z-index: 50;
+                transform: translateX(-100%);
+                box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
+            }
 
-      .sidebar.open {
-        transform: translateX(0);
-      }
+            .sidebar.open {
+                transform: translateX(0);
+            }
 
-      .sidebar-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 40;
-        backdrop-filter: blur(4px);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s;
-      }
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                backdrop-filter: blur(4px);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
+            }
 
-      .sidebar-overlay.open {
-        opacity: 1;
-        pointer-events: auto;
-      }
-    }
+            .sidebar-overlay.open {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
 
-    /* Accordion */
-    details>summary {
-      list-style: none;
-      cursor: pointer;
-    }
+        /* Accordion */
+        details>summary {
+            list-style: none;
+            cursor: pointer;
+        }
 
-    details>summary::-webkit-details-marker {
-      display: none;
-    }
+        details>summary::-webkit-details-marker {
+            display: none;
+        }
 
-    details[open]>summary .arrow {
-      transform: rotate(180deg);
-    }
-  </style>
+        details[open]>summary .arrow {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 
 <body class="h-screen w-screen overflow-hidden flex flex-col">
 
-  <!-- Header -->
-  <header
-    class="h-16 border-b border-[var(--border)] bg-[var(--bg-secondary)] flex items-center justify-between px-4 lg:px-6 shrink-0 z-30">
-    <div class="flex items-center gap-3">
-      <button id="btnMenu" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-tertiary)]">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </button>
-      <div
-        class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold font-mono">
-        A</div>
-      <h1 class="text-lg lg:text-xl font-bold tracking-tight truncate">Pro ASCII Studio</h1>
-    </div>
-    <div class="flex items-center gap-2">
-      <button id="themeToggle" class="p-2 rounded-full hover:bg-[var(--bg-tertiary)] transition" title="Toggle Theme">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="flex-1 flex relative overflow-hidden">
-
-    <!-- Mobile Overlay -->
-    <div id="sidebarOverlay" class="sidebar-overlay lg:hidden"></div>
-
-    <!-- Sidebar Controls -->
-    <aside id="sidebar"
-      class="sidebar w-[320px] lg:w-[360px] bg-[var(--bg-primary)] border-r border-[var(--border)] flex flex-col overflow-y-auto shrink-0">
-
-      <div class="p-4 flex flex-col gap-4">
-
-        <!-- Input Source -->
-        <div class="control-group">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Input</h2>
-          <div class="grid grid-cols-4 gap-1 mb-3">
-            <button id="tabImage" class="btn btn-primary text-[10px] px-1 py-2">Image</button>
-            <button id="tabCamera" class="btn btn-secondary text-[10px] px-1 py-2">Cam</button>
-            <button id="tabVideo" class="btn btn-secondary text-[10px] px-1 py-2">Video</button>
-            <button id="tabText" class="btn btn-secondary text-[10px] px-1 py-2">Text</button>
-          </div>
-
-          <!-- Panels -->
-          <div id="panelImage" class="block">
-            <label id="dropZone" class="drop-zone flex flex-col items-center justify-center p-4 cursor-pointer h-32">
-              <svg class="w-6 h-6 text-[var(--text-secondary)] mb-2" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                </path>
-              </svg>
-              <span class="text-xs text-[var(--text-secondary)]">Drop or Click</span>
-              <input type="file" id="fileInput" accept="image/*" class="hidden" />
-            </label>
-          </div>
-
-          <div id="panelCamera" class="hidden">
-            <div class="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
-              <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
-              <div id="camPlaceholder"
-                class="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] text-xs">Camera
-                off</div>
-            </div>
-            <button id="btnToggleCam" class="btn btn-secondary w-full justify-center text-xs">Start Camera</button>
-          </div>
-
-          <div id="panelVideo" class="hidden">
-            <label class="drop-zone flex flex-col items-center justify-center p-4 cursor-pointer h-24 mb-2">
-              <span class="text-xs text-[var(--text-secondary)]">Select Video</span>
-              <input type="file" id="videoInput" accept="video/*" class="hidden" />
-            </label>
-            <video id="uploadedVideo" class="hidden" playsinline></video>
-            <div id="videoControls" class="hidden flex flex-col gap-2">
-              <div class="flex items-center justify-between">
-                <button id="btnVidToggle" class="btn btn-primary text-[10px] py-1 px-2">Play</button>
-                <span id="vidTime" class="text-[10px] font-mono text-[var(--text-secondary)]">0:00</span>
-              </div>
-              <input type="range" id="vidProgress" min="0" max="100" value="0" class="input-range">
-            </div>
-          </div>
-
-          <div id="panelText" class="hidden flex flex-col gap-2">
-            <textarea id="inpText" class="select-input h-20 font-mono text-xs resize-none"
-              placeholder="Type..."></textarea>
-            <div class="grid grid-cols-2 gap-2">
-              <select id="selFont" class="select-input text-xs">
-                <option value="Inter">Inter</option>
-                <option value="JetBrains Mono">Mono</option>
-                <option value="Bangers">Comic</option>
-                <option value="VT323">Retro</option>
-              </select>
-              <input type="number" id="inpFontSize" value="60" min="10" max="200" class="select-input text-xs">
-            </div>
-          </div>
-        </div>
-
-        <!-- Style Settings -->
-        <details class="control-group" open>
-          <summary
-            class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
-            <span>Style</span>
-            <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </summary>
-          <div class="flex flex-col gap-3">
-            <div>
-              <div class="flex justify-between mb-1">
-                <label class="text-xs font-medium">Resolution</label>
-                <span id="valRes" class="text-xs font-mono text-[var(--text-secondary)]">6px</span>
-              </div>
-              <input type="range" id="inpRes" min="1" max="20" value="6" class="input-range">
-            </div>
-            <div>
-              <label class="text-xs font-medium mb-1 block">Char Set</label>
-              <select id="selCharSet" class="select-input text-xs">
-                <option value="standard" selected>Standard</option>
-                <option value="ultra">Ultra High Detail</option>
-                <option value="simple">Simple</option>
-                <option value="numbers">Numbers</option>
-                <option value="letters">Letters</option>
-                <option value="blocks">Blocks</option>
-                <option value="matrix">Matrix</option>
-                <option value="custom">Custom</option>
-              </select>
-              <input id="inpCustomChars" type="text" class="select-input mt-2 hidden text-xs font-mono"
-                placeholder="Custom chars..." />
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-medium">Invert</label>
-              <input type="checkbox" id="chkInvert" class="w-4 h-4 rounded border-[var(--border)]">
-            </div>
-          </div>
-        </details>
-
-        <!-- Color Settings -->
-        <details class="control-group" open>
-          <summary
-            class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
-            <span>Color & Palette</span>
-            <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </summary>
-          <div class="flex flex-col gap-3">
-            <!-- Theme -->
-            <div>
-              <label class="text-xs font-medium mb-1 block">Theme (Tint)</label>
-              <select id="selTheme" class="select-input text-xs mb-2">
-                <option value="original" selected>Original</option>
-                <option value="monochrome">Monochrome</option>
-                <option value="red">Red Matrix</option>
-                <option value="green">Hacker Green</option>
-                <option value="blue">Cyber Blue</option>
-                <option value="custom">Custom Tint</option>
-                <option value="neon">Neon Gradient</option>
-              </select>
-              <div id="customThemeColorContainer" class="hidden">
-                <input type="color" id="inpThemeColor" value="#ff00ff" class="h-8 w-full rounded cursor-pointer">
-              </div>
-            </div>
-
-            <!-- Palette -->
-            <div>
-              <label class="text-xs font-medium mb-1 block">Palette (Quantize)</label>
-              <select id="selPalette" class="select-input text-xs mb-2">
-                <option value="none" selected>None (True Color)</option>
-                <option value="gameboy">Gameboy (4 Colors)</option>
-                <option value="cga">CGA (16 Colors)</option>
-                <option value="sepia">Sepia Tone</option>
-                <option value="grayscale">Grayscale</option>
-                <option value="cyberpunk">Cyberpunk</option>
-                <option value="custom">Custom Palette</option>
-              </select>
-
-              <!-- Custom Palette Editor -->
-              <div id="customPaletteEditor"
-                class="hidden flex flex-wrap gap-2 p-2 bg-[var(--bg-primary)] rounded border border-[var(--border)]">
-                <!-- Colors injected here -->
-                <button id="btnAddPaletteColor"
-                  class="w-6 h-6 rounded-full border border-dashed border-[var(--text-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)]">+</button>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Adjustments -->
-        <details class="control-group">
-          <summary
-            class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
-            <span>Adjustments</span>
-            <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </summary>
-          <div class="flex flex-col gap-3">
-            <div>
-              <div class="flex justify-between mb-1">
-                <label class="text-xs font-medium">Contrast</label>
-                <span id="valContrast" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
-              </div>
-              <input type="range" id="inpContrast" min="-100" max="100" value="0" class="input-range">
-            </div>
-            <div>
-              <div class="flex justify-between mb-1">
-                <label class="text-xs font-medium">Brightness</label>
-                <span id="valBrightness" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
-              </div>
-              <input type="range" id="inpBrightness" min="-100" max="100" value="0" class="input-range">
-            </div>
-            <div>
-              <div class="flex justify-between mb-1">
-                <label class="text-xs font-medium">Saturation</label>
-                <span id="valSaturation" class="text-xs font-mono text-[var(--text-secondary)]">100%</span>
-              </div>
-              <input type="range" id="inpSaturation" min="0" max="200" value="100" class="input-range">
-            </div>
-          </div>
-        </details>
-
-        <!-- Export -->
-        <div class="mt-4 grid grid-cols-2 gap-2">
-          <button id="btnViewText" class="btn btn-secondary text-xs justify-center">View Text</button>
-          <button id="btnDownloadPng" class="btn btn-primary text-xs justify-center">Save PNG</button>
-        </div>
-        <div id="statusBar" class="text-[10px] font-mono text-[var(--text-secondary)] text-center opacity-50 mt-2">Ready
-        </div>
-      </div>
-    </aside>
-
-    <!-- Output Area -->
-    <section class="flex-1 bg-[var(--bg-secondary)] relative flex flex-col min-w-0">
-      <!-- Toolbar -->
-      <div
-        class="h-10 border-b border-[var(--border)] flex items-center px-4 justify-between bg-[var(--bg-tertiary)] shrink-0">
-        <div class="flex items-center gap-4">
-          <span id="statDims" class="text-xs font-mono text-[var(--text-secondary)]">0 x 0</span>
+    <!-- Header -->
+    <header
+        class="h-16 border-b border-[var(--border)] bg-[var(--bg-secondary)] flex items-center justify-between px-4 lg:px-6 shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <button id="btnMenu" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-[var(--bg-tertiary)]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+            <div
+                class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold font-mono">
+                A</div>
+            <h1 class="text-lg lg:text-xl font-bold tracking-tight truncate">Pro ASCII Studio</h1>
         </div>
         <div class="flex items-center gap-2">
-          <button id="zoomOut" class="p-1 hover:bg-[var(--bg-primary)] rounded text-[var(--text-secondary)]"
-            title="Zoom Out">-</button>
-          <span id="zoomVal"
-            class="text-xs font-mono self-center w-8 text-center text-[var(--text-secondary)]">100%</span>
-          <button id="zoomIn" class="p-1 hover:bg-[var(--bg-primary)] rounded text-[var(--text-secondary)]"
-            title="Zoom In">+</button>
+            <button id="themeToggle" class="p-2 rounded-full hover:bg-[var(--bg-tertiary)] transition"
+                title="Toggle Theme">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                    </path>
+                </svg>
+            </button>
         </div>
-      </div>
+    </header>
 
-      <!-- Canvas Container -->
-      <div class="flex-1 overflow-auto relative flex items-center justify-center p-4 bg-[var(--bg-primary)]">
-        <div id="outputWrapper" class="origin-center transition-transform duration-100 ease-out shadow-2xl">
-          <canvas id="outputCanvas"></canvas>
-        </div>
+    <!-- Main Content -->
+    <main class="flex-1 flex relative overflow-hidden">
 
-        <!-- Empty State -->
-        <div id="emptyState"
-          class="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-secondary)] pointer-events-none">
-          <div class="w-16 h-16 mb-4 rounded-2xl bg-[var(--bg-tertiary)] flex items-center justify-center">
-            <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-              </path>
-            </svg>
-          </div>
-          <p class="text-sm font-medium">No image loaded</p>
-        </div>
+        <!-- Mobile Overlay -->
+        <div id="sidebarOverlay" class="sidebar-overlay lg:hidden"></div>
 
-        <!-- Loader -->
-        <div id="loader"
-          class="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20 hidden">
-          <div class="loader"></div>
-        </div>
-      </div>
-    </section>
-  </main>
+        <!-- Sidebar Controls -->
+        <aside id="sidebar"
+            class="sidebar w-[320px] lg:w-[360px] bg-[var(--bg-primary)] border-r border-[var(--border)] flex flex-col overflow-y-auto shrink-0">
 
-  <!-- Text View Modal -->
-  <div id="textModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="textModalBg"></div>
-    <div
-      class="absolute inset-4 md:inset-10 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] flex flex-col shadow-2xl">
-      <div
-        class="h-12 border-b border-[var(--border)] flex items-center justify-between px-4 bg-[var(--bg-tertiary)] rounded-t-xl">
-        <h3 class="font-bold text-sm">ASCII Text</h3>
-        <div class="flex gap-2">
-          <button id="btnCopyText" class="btn btn-primary text-xs py-1">Copy</button>
-          <button id="btnCloseText" class="p-2 hover:bg-[var(--bg-primary)] rounded">✕</button>
+            <div class="p-4 flex flex-col gap-4">
+
+                <!-- Input Source -->
+                <div class="control-group">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Input</h2>
+                    <div class="grid grid-cols-4 gap-1 mb-3">
+                        <button id="tabImage" class="btn btn-primary text-[10px] px-1 py-2">Image</button>
+                        <button id="tabCamera" class="btn btn-secondary text-[10px] px-1 py-2">Cam</button>
+                        <button id="tabVideo" class="btn btn-secondary text-[10px] px-1 py-2">Video</button>
+                        <button id="tabText" class="btn btn-secondary text-[10px] px-1 py-2">Text</button>
+                    </div>
+
+                    <!-- Panels -->
+                    <div id="panelImage" class="block">
+                        <label id="dropZone"
+                            class="drop-zone flex flex-col items-center justify-center p-4 cursor-pointer h-32">
+                            <svg class="w-6 h-6 text-[var(--text-secondary)] mb-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <span class="text-xs text-[var(--text-secondary)]">Drop or Click</span>
+                            <input type="file" id="fileInput" accept="image/*" class="hidden" />
+                        </label>
+                    </div>
+
+                    <div id="panelCamera" class="hidden">
+                        <div class="relative rounded-lg overflow-hidden bg-black aspect-video mb-2">
+                            <video id="webcamVideo" autoplay playsinline muted
+                                class="w-full h-full object-cover"></video>
+                            <div id="camPlaceholder"
+                                class="absolute inset-0 flex items-center justify-center text-[var(--text-secondary)] text-xs">
+                                Camera
+                                off</div>
+                        </div>
+                        <button id="btnToggleCam" class="btn btn-secondary w-full justify-center text-xs">Start
+                            Camera</button>
+                    </div>
+
+                    <div id="panelVideo" class="hidden">
+                        <label class="drop-zone flex flex-col items-center justify-center p-4 cursor-pointer h-24 mb-2">
+                            <span class="text-xs text-[var(--text-secondary)]">Select Video</span>
+                            <input type="file" id="videoInput" accept="video/*" class="hidden" />
+                        </label>
+                        <video id="uploadedVideo" class="hidden" playsinline></video>
+                        <div id="videoControls" class="hidden flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <button id="btnVidToggle" class="btn btn-primary text-[10px] py-1 px-2">Play</button>
+                                <span id="vidTime"
+                                    class="text-[10px] font-mono text-[var(--text-secondary)]">0:00</span>
+                            </div>
+                            <input type="range" id="vidProgress" min="0" max="100" value="0" class="input-range">
+                        </div>
+                    </div>
+
+                    <div id="panelText" class="hidden flex flex-col gap-2">
+                        <textarea id="inpText" class="select-input h-20 font-mono text-xs resize-none"
+                            placeholder="Type..."></textarea>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="selFont" class="select-input text-xs">
+                                <option value="Inter">Inter</option>
+                                <option value="JetBrains Mono">Mono</option>
+                                <option value="Bangers">Comic</option>
+                                <option value="VT323">Retro</option>
+                                <option value="Fira Code">Fira Code</option>
+                                <option value="Source Code Pro">Source Code</option>
+                                <option value="Inconsolata">Inconsolata</option>
+                                <option value="Doto">Doto (Matrix)</option>
+                                <option value="Rubik Mono One">Rubik (Bold)</option>
+                            </select>
+                            <input type="number" id="inpFontSize" value="60" min="10" max="200"
+                                class="select-input text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Style Settings -->
+                <details class="control-group" open>
+                    <summary
+                        class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+                        <span>Style</span>
+                        <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </summary>
+                    <div class="flex flex-col gap-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-xs font-medium">Resolution</label>
+                                <span id="valRes" class="text-xs font-mono text-[var(--text-secondary)]">6px</span>
+                            </div>
+                            <input type="range" id="inpRes" min="1" max="20" value="6" class="input-range">
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium mb-1 block">Output Font</label>
+                            <select id="selOutputFont" class="select-input text-xs">
+                                <option value="JetBrains Mono" selected>JetBrains Mono</option>
+                                <option value="Fira Code">Fira Code</option>
+                                <option value="Source Code Pro">Source Code Pro</option>
+                                <option value="Inconsolata">Inconsolata</option>
+                                <option value="Share Tech Mono">Share Tech Mono</option>
+                                <option value="Cutive Mono">Cutive Mono</option>
+                                <option value="Anonymous Pro">Anonymous Pro</option>
+                                <option value="Ubuntu Mono">Ubuntu Mono</option>
+                                <option value="Space Mono">Space Mono</option>
+                                <option value="Rubik Mono One">Rubik Mono One</option>
+                                <option value="Doto">Doto</option>
+                                <option value="VT323">VT323</option>
+                                <option value="Press Start 2P">Press Start 2P</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium mb-1 block">Char Set</label>
+                            <select id="selCharSet" class="select-input text-xs">
+                                <option value="standard" selected>Standard</option>
+                                <option value="ultra">Ultra High Detail</option>
+                                <option value="simple">Simple</option>
+                                <option value="numbers">Numbers</option>
+                                <option value="letters">Letters</option>
+                                <option value="blocks">Blocks</option>
+                                <option value="matrix">Matrix</option>
+                                <option value="glitch">Glitch</option>
+                                <option value="pipes">Pipes</option>
+                                <option value="slashes">Slashes</option>
+                                <option value="circles">Circles</option>
+                                <option value="squares">Squares</option>
+                                <option value="triangles">Triangles</option>
+                                <option value="math">Math</option>
+                                <option value="cards">Cards</option>
+                                <option value="chess">Chess</option>
+                                <option value="weather">Weather</option>
+                                <option value="music">Music</option>
+                                <option value="braille_inv">Braille (Inv)</option>
+                                <option value="density">Density (High)</option>
+                                <option value="shading">Shading (Exp)</option>
+                                <option value="runes">Runes</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                            <input id="inpCustomChars" type="text" class="select-input mt-2 hidden text-xs font-mono"
+                                placeholder="Custom chars..." />
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-medium">Invert</label>
+                            <input type="checkbox" id="chkInvert" class="w-4 h-4 rounded border-[var(--border)]">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Color Settings -->
+                <details class="control-group" open>
+                    <summary
+                        class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+                        <span>Color & Palette</span>
+                        <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </summary>
+                    <div class="flex flex-col gap-3">
+                        <!-- Theme -->
+                        <div>
+                            <label class="text-xs font-medium mb-1 block">Theme (Tint)</label>
+                            <select id="selTheme" class="select-input text-xs mb-2">
+                                <option value="original" selected>Original</option>
+                                <option value="monochrome">Monochrome</option>
+                                <option value="red">Red Matrix</option>
+                                <option value="green">Hacker Green</option>
+                                <option value="blue">Cyber Blue</option>
+                                <option value="amber">Terminal Amber</option>
+                                <option value="cyan">Tron Cyan</option>
+                                <option value="magenta">Magenta</option>
+                                <option value="yellow">Yellow</option>
+                                <option value="lime">Lime</option>
+                                <option value="orange">Orange</option>
+                                <option value="purple">Purple</option>
+                                <option value="teal">Teal</option>
+                                <option value="pink">Hot Pink</option>
+                                <option value="gold">Gold</option>
+                                <option value="custom">Custom Tint</option>
+                                <option value="neon">Neon Gradient</option>
+                            </select>
+                            <div id="customThemeColorContainer" class="hidden">
+                                <input type="color" id="inpThemeColor" value="#ff00ff"
+                                    class="h-8 w-full rounded cursor-pointer">
+                            </div>
+                        </div>
+
+                        <!-- Palette -->
+                        <div>
+                            <label class="text-xs font-medium mb-1 block">Palette (Quantize)</label>
+                            <select id="selPalette" class="select-input text-xs mb-2">
+                                <option value="none" selected>None (True Color)</option>
+                                <option value="gameboy">Gameboy (4 Colors)</option>
+                                <option value="cga">CGA (16 Colors)</option>
+                                <option value="sepia">Sepia Tone</option>
+                                <option value="grayscale">Grayscale</option>
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="c64">Commodore 64</option>
+                                <option value="zx_spectrum">ZX Spectrum</option>
+                                <option value="nes">NES</option>
+                                <option value="pico8">PICO-8</option>
+                                <option value="apple2">Apple II</option>
+                                <option value="msx">MSX</option>
+                                <option value="vaporwave">Vaporwave</option>
+                                <option value="sunset">Sunset</option>
+                                <option value="ocean">Ocean</option>
+                                <option value="forest">Forest</option>
+                                <option value="fire">Fire</option>
+                                <option value="ice">Ice</option>
+                                <option value="custom">Custom Palette</option>
+                            </select>
+
+                            <!-- Custom Palette Editor -->
+                            <div id="customPaletteEditor"
+                                class="hidden flex flex-wrap gap-2 p-2 bg-[var(--bg-primary)] rounded border border-[var(--border)]">
+                                <!-- Colors injected here -->
+                                <button id="btnAddPaletteColor"
+                                    class="w-6 h-6 rounded-full border border-dashed border-[var(--text-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)]">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Adjustments -->
+                <details class="control-group">
+                    <summary
+                        class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+                        <span>Adjustments</span>
+                        <svg class="arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </summary>
+                    <div class="flex flex-col gap-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-xs font-medium">Contrast</label>
+                                <span id="valContrast" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
+                            </div>
+                            <input type="range" id="inpContrast" min="-100" max="100" value="0" class="input-range">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-xs font-medium">Brightness</label>
+                                <span id="valBrightness" class="text-xs font-mono text-[var(--text-secondary)]">0</span>
+                            </div>
+                            <input type="range" id="inpBrightness" min="-100" max="100" value="0" class="input-range">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-xs font-medium">Saturation</label>
+                                <span id="valSaturation"
+                                    class="text-xs font-mono text-[var(--text-secondary)]">100%</span>
+                            </div>
+                            <input type="range" id="inpSaturation" min="0" max="200" value="100" class="input-range">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Export -->
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                    <button id="btnViewText" class="btn btn-secondary text-xs justify-center">View Text</button>
+                    <button id="btnDownloadPng" class="btn btn-primary text-xs justify-center">Save PNG</button>
+                </div>
+                <div id="statusBar"
+                    class="text-[10px] font-mono text-[var(--text-secondary)] text-center opacity-50 mt-2">Ready
+                </div>
+            </div>
+        </aside>
+
+        <!-- Output Area -->
+        <section class="flex-1 bg-[var(--bg-secondary)] relative flex flex-col min-w-0">
+            <!-- Toolbar -->
+            <div
+                class="h-10 border-b border-[var(--border)] flex items-center px-4 justify-between bg-[var(--bg-tertiary)] shrink-0">
+                <div class="flex items-center gap-4">
+                    <span id="statDims" class="text-xs font-mono text-[var(--text-secondary)]">0 x 0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="zoomOut" class="p-1 hover:bg-[var(--bg-primary)] rounded text-[var(--text-secondary)]"
+                        title="Zoom Out">-</button>
+                    <span id="zoomVal"
+                        class="text-xs font-mono self-center w-8 text-center text-[var(--text-secondary)]">100%</span>
+                    <button id="zoomIn" class="p-1 hover:bg-[var(--bg-primary)] rounded text-[var(--text-secondary)]"
+                        title="Zoom In">+</button>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="flex-1 overflow-auto relative flex items-center justify-center p-4 bg-[var(--bg-primary)]">
+                <div id="outputWrapper" class="origin-center transition-transform duration-100 ease-out shadow-2xl">
+                    <canvas id="outputCanvas"></canvas>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState"
+                    class="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-secondary)] pointer-events-none">
+                    <div class="w-16 h-16 mb-4 rounded-2xl bg-[var(--bg-tertiary)] flex items-center justify-center">
+                        <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium">No image loaded</p>
+                </div>
+
+                <!-- Loader -->
+                <div id="loader"
+                    class="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20 hidden">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Text View Modal -->
+    <div id="textModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="textModalBg"></div>
+        <div
+            class="absolute inset-4 md:inset-10 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] flex flex-col shadow-2xl">
+            <div
+                class="h-12 border-b border-[var(--border)] flex items-center justify-between px-4 bg-[var(--bg-tertiary)] rounded-t-xl">
+                <h3 class="font-bold text-sm">ASCII Text</h3>
+                <div class="flex gap-2">
+                    <button id="btnCopyText" class="btn btn-primary text-xs py-1">Copy</button>
+                    <button id="btnCloseText" class="p-2 hover:bg-[var(--bg-primary)] rounded">✕</button>
+                </div>
+            </div>
+            <textarea id="textOutput"
+                class="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] font-mono text-[10px] p-4 resize-none outline-none"
+                readonly></textarea>
         </div>
-      </div>
-      <textarea id="textOutput"
-        class="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] font-mono text-[10px] p-4 resize-none outline-none"
-        readonly></textarea>
     </div>
-  </div>
 
-  <div id="toast" class="toast"></div>
-
-  <!-- Web Worker Script Blob -->
-  <script id="workerScript" type="javascript/worker">
+    <div id="toast" class="toast"></div>
+<!-- Web Worker Script Blob -->
+<script id="workerScript" type="javascript/worker">
     self.onmessage = function(e) {
       const { imageData, width, height, options } = e.data;
       const { resolution, chars, invert, contrast, brightness, saturation, sepia, hue, theme, customThemeColor, palette, customPalette } = options;
@@ -634,6 +711,16 @@
         if (theme === 'red') return [gray, 0, 0];
         if (theme === 'green') return [0, gray, 0];
         if (theme === 'blue') return [0, 0, gray];
+        if (theme === 'amber') return [255, 176, 0].map(c => (c * gray) / 255);
+        if (theme === 'cyan') return [0, 255, 255].map(c => (c * gray) / 255);
+        if (theme === 'magenta') return [255, 0, 255].map(c => (c * gray) / 255);
+        if (theme === 'yellow') return [255, 255, 0].map(c => (c * gray) / 255);
+        if (theme === 'lime') return [50, 205, 50].map(c => (c * gray) / 255);
+        if (theme === 'orange') return [255, 165, 0].map(c => (c * gray) / 255);
+        if (theme === 'purple') return [128, 0, 128].map(c => (c * gray) / 255);
+        if (theme === 'teal') return [0, 128, 128].map(c => (c * gray) / 255);
+        if (theme === 'pink') return [255, 105, 180].map(c => (c * gray) / 255);
+        if (theme === 'gold') return [255, 215, 0].map(c => (c * gray) / 255);
         if (theme === 'custom') {
           const hex = customThemeColor.replace('#', '');
           const tr = parseInt(hex.substring(0, 2), 16);
@@ -685,6 +772,18 @@
         else if (palette === 'sepia') paletteColors = [[46, 30, 15], [92, 60, 30], [138, 90, 45], [184, 120, 60], [230, 150, 75]];
         else if (palette === 'grayscale') paletteColors = [[0,0,0], [64,64,64], [128,128,128], [192,192,192], [255,255,255]];
         else if (palette === 'cyberpunk') paletteColors = [[10, 10, 20], [255, 0, 128], [0, 255, 255], [255, 255, 0], [128, 0, 255]];
+        else if (palette === 'c64') paletteColors = [[0,0,0],[255,255,255],[136,0,0],[170,255,238],[204,68,204],[0,204,85],[0,0,170],[238,238,119],[221,136,85],[102,68,0],[255,119,119],[51,51,51],[119,119,119],[170,255,102],[0,136,255],[187,187,187]];
+        else if (palette === 'zx_spectrum') paletteColors = [[0,0,0],[0,0,215],[215,0,0],[215,0,215],[0,215,0],[0,215,215],[215,215,0],[215,215,215],[0,0,255],[255,0,0],[255,0,255],[0,255,0],[0,255,255],[255,255,0],[255,255,255]];
+        else if (palette === 'nes') paletteColors = [[124,124,124],[0,0,252],[0,0,188],[68,40,188],[148,0,132],[168,0,32],[168,16,0],[136,20,0],[80,48,0],[0,120,0],[0,104,0],[0,88,0],[0,64,88],[0,0,0],[0,0,0],[0,0,0],[188,188,188],[0,120,248],[0,88,248],[104,68,252],[216,0,204],[228,0,88],[248,56,0],[228,92,16],[172,124,0],[0,184,0],[0,168,0],[0,168,68],[0,136,136],[0,0,0],[0,0,0],[0,0,0],[248,248,248],[60,188,252],[104,136,252],[152,120,248],[248,120,248],[248,88,152],[248,120,88],[252,160,68],[248,184,0],[184,248,24],[88,216,84],[88,248,152],[0,232,216],[120,120,120],[0,0,0],[0,0,0],[252,252,252],[164,228,252],[184,184,248],[216,184,248],[248,184,248],[248,164,192],[240,208,176],[252,224,168],[248,216,120],[216,248,120],[184,248,184],[184,248,216],[0,252,252],[248,216,248],[0,0,0],[0,0,0]];
+        else if (palette === 'pico8') paletteColors = [[0,0,0],[29,43,83],[126,37,83],[0,135,81],[171,82,54],[95,87,79],[194,195,199],[255,241,232],[255,0,77],[255,163,0],[255,236,39],[0,228,54],[41,173,255],[131,118,156],[255,119,168],[255,204,170]];
+        else if (palette === 'apple2') paletteColors = [[0,0,0],[114,38,64],[64,51,127],[228,52,254],[14,89,64],[128,128,128],[28,179,254],[242,211,254],[38,165,42],[234,165,28],[146,144,255],[255,255,255],[0,0,0],[255,255,255],[0,0,0],[255,255,255]]; // Approx
+        else if (palette === 'msx') paletteColors = [[0,0,0],[0,0,0],[36,219,36],[109,255,109],[36,36,255],[73,109,255],[182,36,36],[73,219,255],[255,36,36],[255,109,109],[219,219,36],[219,219,146],[36,146,36],[219,73,182],[182,182,182],[255,255,255]];
+        else if (palette === 'vaporwave') paletteColors = [[255,113,206],[1,205,254],[5,255,161],[185,103,255],[255,251,150]];
+        else if (palette === 'sunset') paletteColors = [[255,229,119],[254,203,119],[254,177,119],[245,136,95],[222,94,100],[191,59,108],[153,30,102],[108,13,99],[67,3,87],[34,1,53]];
+        else if (palette === 'ocean') paletteColors = [[202,240,248],[144,224,239],[72,202,228],[0,180,216],[0,150,199],[0,119,182],[2,62,138],[3,4,94]];
+        else if (palette === 'forest') paletteColors = [[216,243,220],[183,228,199],[149,213,178],[116,198,157],[82,183,136],[64,145,108],[45,106,79],[27,67,50],[8,28,21]];
+        else if (palette === 'fire') paletteColors = [[255,225,105],[255,205,5],[255,145,5],[255,75,5],[205,0,5],[145,0,5],[85,0,5]];
+        else if (palette === 'ice') paletteColors = [[237,242,251],[226,234,252],[209,219,253],[193,204,253],[162,178,255],[136,156,252],[110,133,249]];
         else if (palette === 'custom' && customPalette && customPalette.length > 0) {
            paletteColors = customPalette.map(hex => {
              const r = parseInt(hex.substring(1, 3), 16);
@@ -747,86 +846,103 @@
     };
   </script>
 
-  <script>
+<script>
     // --- App State ---
     const state = {
-      source: 'image',
-      resolution: 6,
-      charSet: 'standard',
-      customChars: '',
-      invert: false,
-      contrast: 0,
-      brightness: 0,
-      saturation: 100,
-      sepia: 0,
-      hue: 0,
-      theme: 'original',
-      customThemeColor: '#ff00ff',
-      palette: 'none',
-      customPalette: ['#ff0000', '#00ff00', '#0000ff'], // Default custom colors
-      zoom: 1,
-      text: '',
-      fontFamily: 'Inter',
-      fontSize: 60
+        source: 'image',
+        resolution: 6,
+        charSet: 'standard',
+        customChars: '',
+        invert: false,
+        contrast: 0,
+        brightness: 0,
+        saturation: 100,
+        sepia: 0,
+        hue: 0,
+        theme: 'original',
+        customThemeColor: '#ff00ff',
+        palette: 'none',
+        customPalette: ['#ff0000', '#00ff00', '#0000ff'], // Default custom colors
+        zoom: 1,
+        text: '',
+        fontFamily: 'Inter',
+        outputFont: 'JetBrains Mono',
+        fontSize: 60
     };
 
     const charSets = {
-      ultra: " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
-      standard: " .:-=+*#%@",
-      simple: " .:-=+*#%@8",
-      numbers: " 1234567890",
-      letters: " abcdefghijklmnopqrstuvwxyz",
-      blocks: " ░▒▓█",
-      matrix: " 01",
-      custom: ""
+        ultra: " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+        standard: " .:-=+*#%@",
+        simple: " .:-=+*#%@8",
+        numbers: " 1234567890",
+        letters: " abcdefghijklmnopqrstuvwxyz",
+        blocks: " ░▒▓█",
+        matrix: " 01",
+        glitch: " ░▒▓█▓▒░",
+        pipes: " ║│┃│║",
+        slashes: " /\\|/\\|",
+        circles: " .oO0",
+        squares: " □▣■",
+        triangles: " ▲▼◄►",
+        math: " +-*/=",
+        cards: " ♠♣♥♦",
+        chess: " ♔♕♖♗♘♙",
+        weather: " ☼☁☂☃",
+        music: " ♩♪♫♬",
+        braille_inv: " ⠿⠾⠽⠼⠻⠺⠹⠸⠷⠶⠵⠴⠳⠲⠱⠰⠯⠮⠭⠬⠫⠪⠩⠨⠧⠦⠥⠤⠣⠢⠡⠠⠟⠞⠝⠜⠛⠚⠙⠘⠗⠖⠕⠔⠓⠒⠑⠐⠏⠎⠍⠌⠋⠊⠉⠈⠇⠆⠅⠄⠃⠂⠁ ",
+        density: " _.,-=+:;cba!?0123456789$W#@Ñ",
+        shading: " ░▒▓█",
+        runes: " ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ",
+        custom: ""
     };
 
     // --- DOM ---
     const els = {
-      sidebar: document.getElementById('sidebar'),
-      sidebarOverlay: document.getElementById('sidebarOverlay'),
-      btnMenu: document.getElementById('btnMenu'),
-      outputCanvas: document.getElementById('outputCanvas'),
-      outputWrapper: document.getElementById('outputWrapper'),
-      emptyState: document.getElementById('emptyState'),
-      loader: document.getElementById('loader'),
-      toast: document.getElementById('toast'),
-      statDims: document.getElementById('statDims'),
+        sidebar: document.getElementById('sidebar'),
+        sidebarOverlay: document.getElementById('sidebarOverlay'),
+        btnMenu: document.getElementById('btnMenu'),
+        outputCanvas: document.getElementById('outputCanvas'),
+        outputWrapper: document.getElementById('outputWrapper'),
+        emptyState: document.getElementById('emptyState'),
+        loader: document.getElementById('loader'),
+        toast: document.getElementById('toast'),
+        statDims: document.getElementById('statDims'),
 
-      // Inputs
-      fileInput: document.getElementById('fileInput'),
-      videoInput: document.getElementById('videoInput'),
-      webcamVideo: document.getElementById('webcamVideo'),
-      uploadedVideo: document.getElementById('uploadedVideo'),
+        // Inputs
+        fileInput: document.getElementById('fileInput'),
+        videoInput: document.getElementById('videoInput'),
+        webcamVideo: document.getElementById('webcamVideo'),
+        uploadedVideo: document.getElementById('uploadedVideo'),
 
-      // Controls
-      inpRes: document.getElementById('inpRes'),
-      valRes: document.getElementById('valRes'),
-      selCharSet: document.getElementById('selCharSet'),
-      inpCustomChars: document.getElementById('inpCustomChars'),
-      chkInvert: document.getElementById('chkInvert'),
+        // Controls
+        inpRes: document.getElementById('inpRes'),
+        valRes: document.getElementById('valRes'),
+        selCharSet: document.getElementById('selCharSet'),
+        inpCustomChars: document.getElementById('inpCustomChars'),
+        chkInvert: document.getElementById('chkInvert'),
 
-      inpContrast: document.getElementById('inpContrast'),
-      valContrast: document.getElementById('valContrast'),
-      inpBrightness: document.getElementById('inpBrightness'),
-      valBrightness: document.getElementById('valBrightness'),
-      inpSaturation: document.getElementById('inpSaturation'),
-      valSaturation: document.getElementById('valSaturation'),
+        inpContrast: document.getElementById('inpContrast'),
+        valContrast: document.getElementById('valContrast'),
+        inpBrightness: document.getElementById('inpBrightness'),
+        valBrightness: document.getElementById('valBrightness'),
+        inpSaturation: document.getElementById('inpSaturation'),
+        valSaturation: document.getElementById('valSaturation'),
 
-      selTheme: document.getElementById('selTheme'),
-      customThemeColorContainer: document.getElementById('customThemeColorContainer'),
-      inpThemeColor: document.getElementById('inpThemeColor'),
+        selTheme: document.getElementById('selTheme'),
+        customThemeColorContainer: document.getElementById('customThemeColorContainer'),
+        inpThemeColor: document.getElementById('inpThemeColor'),
 
-      selPalette: document.getElementById('selPalette'),
-      customPaletteEditor: document.getElementById('customPaletteEditor'),
-      btnAddPaletteColor: document.getElementById('btnAddPaletteColor'),
+        selPalette: document.getElementById('selPalette'),
+        customPaletteEditor: document.getElementById('customPaletteEditor'),
+        btnAddPaletteColor: document.getElementById('btnAddPaletteColor'),
 
-      // Text View
-      textModal: document.getElementById('textModal'),
-      textOutput: document.getElementById('textOutput'),
-      btnViewText: document.getElementById('btnViewText'),
-      btnCloseText: document.getElementById('btnCloseText'),
-      btnCopyText: document.getElementById('btnCopyText'),
+        // Text View
+        textModal: document.getElementById('textModal'),
+        textOutput: document.getElementById('textOutput'),
+        btnViewText: document.getElementById('btnViewText'),
+        btnCloseText: document.getElementById('btnCloseText'),
+        btnCopyText: document.getElementById('btnCopyText'),
+        selOutputFont: document.getElementById('selOutputFont'),
     };
 
     // --- Worker ---
@@ -840,383 +956,395 @@
     let isGenerating = false;
     let lastRawText = '';
     let rafId = null;
+    let lastBuffer = null;
+    let lastCols = 0;
+    let lastRows = 0;
 
     // --- Init ---
     function init() {
-      setupEventListeners();
-      setupTabs();
-      renderCustomPaletteUI();
+        setupEventListeners();
+        setupTabs();
+        renderCustomPaletteUI();
     }
 
     function setupEventListeners() {
-      // Mobile Menu
-      els.btnMenu.addEventListener('click', () => {
-        els.sidebar.classList.add('open');
-        els.sidebarOverlay.classList.add('open');
-      });
-      els.sidebarOverlay.addEventListener('click', () => {
-        els.sidebar.classList.remove('open');
-        els.sidebarOverlay.classList.remove('open');
-      });
+        // Mobile Menu
+        els.btnMenu.addEventListener('click', () => {
+            els.sidebar.classList.add('open');
+            els.sidebarOverlay.classList.add('open');
+        });
+        els.sidebarOverlay.addEventListener('click', () => {
+            els.sidebar.classList.remove('open');
+            els.sidebarOverlay.classList.remove('open');
+        });
 
-      // Resolution
-      els.inpRes.addEventListener('input', e => {
-        state.resolution = parseInt(e.target.value);
-        els.valRes.textContent = state.resolution + 'px';
-        triggerGenerate();
-      });
+        // Resolution
+        els.inpRes.addEventListener('input', e => {
+            state.resolution = parseInt(e.target.value);
+            els.valRes.textContent = state.resolution + 'px';
+            triggerGenerate();
+        });
 
-      // Charset
-      els.selCharSet.addEventListener('change', e => {
-        state.charSet = e.target.value;
-        els.inpCustomChars.classList.toggle('hidden', state.charSet !== 'custom');
-        triggerGenerate();
-      });
-      els.inpCustomChars.addEventListener('input', e => {
-        state.customChars = e.target.value;
-        triggerGenerate();
-      });
+        // Charset
+        els.selCharSet.addEventListener('change', e => {
+            state.charSet = e.target.value;
+            els.inpCustomChars.classList.toggle('hidden', state.charSet !== 'custom');
+            triggerGenerate();
+        });
+        els.inpCustomChars.addEventListener('input', e => {
+            state.customChars = e.target.value;
+            triggerGenerate();
+        });
 
-      // Invert
-      els.chkInvert.addEventListener('change', e => {
-        state.invert = e.target.checked;
-        triggerGenerate();
-      });
+        // Invert
+        els.chkInvert.addEventListener('change', e => {
+            state.invert = e.target.checked;
+            triggerGenerate();
+        });
 
-      // Adjustments
-      els.inpContrast.addEventListener('input', e => {
-        state.contrast = parseInt(e.target.value);
-        els.valContrast.textContent = state.contrast;
-        triggerGenerate();
-      });
-      els.inpBrightness.addEventListener('input', e => {
-        state.brightness = parseInt(e.target.value);
-        els.valBrightness.textContent = state.brightness;
-        triggerGenerate();
-      });
-      els.inpSaturation.addEventListener('input', e => {
-        state.saturation = parseInt(e.target.value);
-        els.valSaturation.textContent = state.saturation + '%';
-        triggerGenerate();
-      });
+        // Adjustments
+        els.inpContrast.addEventListener('input', e => {
+            state.contrast = parseInt(e.target.value);
+            els.valContrast.textContent = state.contrast;
+            triggerGenerate();
+        });
+        els.inpBrightness.addEventListener('input', e => {
+            state.brightness = parseInt(e.target.value);
+            els.valBrightness.textContent = state.brightness;
+            triggerGenerate();
+        });
+        els.inpSaturation.addEventListener('input', e => {
+            state.saturation = parseInt(e.target.value);
+            els.valSaturation.textContent = state.saturation + '%';
+            triggerGenerate();
+        });
 
-      // Theme
-      els.selTheme.addEventListener('change', e => {
-        state.theme = e.target.value;
-        els.customThemeColorContainer.classList.toggle('hidden', state.theme !== 'custom');
-        triggerGenerate();
-      });
-      els.inpThemeColor.addEventListener('input', e => {
-        state.customThemeColor = e.target.value;
-        triggerGenerate();
-      });
+        // Theme
+        els.selTheme.addEventListener('change', e => {
+            state.theme = e.target.value;
+            els.customThemeColorContainer.classList.toggle('hidden', state.theme !== 'custom');
+            triggerGenerate();
+        });
+        els.inpThemeColor.addEventListener('input', e => {
+            state.customThemeColor = e.target.value;
+            triggerGenerate();
+        });
 
-      // Palette
-      els.selPalette.addEventListener('change', e => {
-        state.palette = e.target.value;
-        els.customPaletteEditor.classList.toggle('hidden', state.palette !== 'custom');
-        triggerGenerate();
-      });
-      els.btnAddPaletteColor.addEventListener('click', () => {
-        state.customPalette.push('#ffffff');
-        renderCustomPaletteUI();
-        triggerGenerate();
-      });
+        // Output Font
+        els.selOutputFont.addEventListener('change', e => {
+            state.outputFont = e.target.value;
+            if (lastBuffer) renderCanvas(lastBuffer, lastCols, lastRows);
+        });
 
-      // Zoom
-      document.getElementById('zoomIn').addEventListener('click', () => {
-        state.zoom = Math.min(5, state.zoom + 0.1);
-        updateZoom();
-      });
-      document.getElementById('zoomOut').addEventListener('click', () => {
-        state.zoom = Math.max(0.1, state.zoom - 0.1);
-        updateZoom();
-      });
+        // Palette
+        els.selPalette.addEventListener('change', e => {
+            state.palette = e.target.value;
+            els.customPaletteEditor.classList.toggle('hidden', state.palette !== 'custom');
+            triggerGenerate();
+        });
+        els.btnAddPaletteColor.addEventListener('click', () => {
+            state.customPalette.push('#ffffff');
+            renderCustomPaletteUI();
+            triggerGenerate();
+        });
 
-      // File Inputs
-      document.getElementById('dropZone').addEventListener('click', () => els.fileInput.click());
-      els.fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+        // Zoom
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            state.zoom = Math.min(5, state.zoom + 0.1);
+            updateZoom();
+        });
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            state.zoom = Math.max(0.1, state.zoom - 0.1);
+            updateZoom();
+        });
 
-      // Text View
-      els.btnViewText.addEventListener('click', () => {
-        els.textOutput.value = lastRawText;
-        els.textModal.classList.remove('hidden');
-      });
-      els.btnCloseText.addEventListener('click', () => els.textModal.classList.add('hidden'));
-      document.getElementById('textModalBg').addEventListener('click', () => els.textModal.classList.add('hidden'));
-      els.btnCopyText.addEventListener('click', () => {
-        els.textOutput.select();
-        document.execCommand('copy');
-        showToast('Copied!');
-      });
+        // File Inputs
+        document.getElementById('dropZone').addEventListener('click', () => els.fileInput.click());
+        els.fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-      // PNG Export
-      document.getElementById('btnDownloadPng').addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.download = 'ascii-art.png';
-        link.href = els.outputCanvas.toDataURL();
-        link.click();
-        showToast('PNG Saved');
-      });
+        // Text View
+        els.btnViewText.addEventListener('click', () => {
+            els.textOutput.value = lastRawText;
+            els.textModal.classList.remove('hidden');
+        });
+        els.btnCloseText.addEventListener('click', () => els.textModal.classList.add('hidden'));
+        document.getElementById('textModalBg').addEventListener('click', () => els.textModal.classList.add('hidden'));
+        els.btnCopyText.addEventListener('click', () => {
+            els.textOutput.select();
+            document.execCommand('copy');
+            showToast('Copied!');
+        });
 
-      // Camera
-      document.getElementById('btnToggleCam').addEventListener('click', toggleCamera);
+        // PNG Export
+        document.getElementById('btnDownloadPng').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'ascii-art.png';
+            link.href = els.outputCanvas.toDataURL();
+            link.click();
+            showToast('PNG Saved');
+        });
 
-      // Video
-      document.querySelector('#panelVideo .drop-zone').addEventListener('click', () => document.getElementById('videoInput').click());
-      document.getElementById('videoInput').addEventListener('change', e => handleVideoFile(e.target.files[0]));
-      document.getElementById('btnVidToggle').addEventListener('click', () => {
-        const vid = els.uploadedVideo;
-        if (vid.paused) { vid.play(); document.getElementById('btnVidToggle').textContent = 'Pause'; }
-        else { vid.pause(); document.getElementById('btnVidToggle').textContent = 'Play'; }
-      });
+        // Camera
+        document.getElementById('btnToggleCam').addEventListener('click', toggleCamera);
 
-      // Worker Message
-      worker.onmessage = e => {
-        const { buffer, rawText, cols, rows } = e.data;
-        lastRawText = rawText;
-        renderCanvas(buffer, cols, rows);
-        els.statDims.textContent = `${cols} x ${rows}`;
-        isGenerating = false;
-        els.emptyState.classList.add('hidden');
-        els.loader.classList.add('hidden');
-        if (state.source === 'video' || state.source === 'camera') requestAnimationFrame(processFrame);
-      };
+        // Video
+        document.querySelector('#panelVideo .drop-zone').addEventListener('click', () => document.getElementById('videoInput').click());
+        document.getElementById('videoInput').addEventListener('change', e => handleVideoFile(e.target.files[0]));
+        document.getElementById('btnVidToggle').addEventListener('click', () => {
+            const vid = els.uploadedVideo;
+            if (vid.paused) { vid.play(); document.getElementById('btnVidToggle').textContent = 'Pause'; }
+            else { vid.pause(); document.getElementById('btnVidToggle').textContent = 'Play'; }
+        });
+
+        // Worker Message
+        worker.onmessage = e => {
+            const { buffer, rawText, cols, rows } = e.data;
+            lastRawText = rawText;
+            lastBuffer = buffer;
+            lastCols = cols;
+            lastRows = rows;
+            renderCanvas(buffer, cols, rows);
+            els.statDims.textContent = `${cols} x ${rows}`;
+            isGenerating = false;
+            els.emptyState.classList.add('hidden');
+            els.loader.classList.add('hidden');
+            if (state.source === 'video' || state.source === 'camera') requestAnimationFrame(processFrame);
+        };
     }
 
     function renderCustomPaletteUI() {
-      // Clear existing colors (except add button)
-      const children = Array.from(els.customPaletteEditor.children);
-      children.forEach(c => { if (c.id !== 'btnAddPaletteColor') c.remove(); });
+        // Clear existing colors (except add button)
+        const children = Array.from(els.customPaletteEditor.children);
+        children.forEach(c => { if (c.id !== 'btnAddPaletteColor') c.remove(); });
 
-      state.customPalette.forEach((color, idx) => {
-        const div = document.createElement('div');
-        div.className = 'relative group';
+        state.customPalette.forEach((color, idx) => {
+            const div = document.createElement('div');
+            div.className = 'relative group';
 
-        const input = document.createElement('input');
-        input.type = 'color';
-        input.value = color;
-        input.className = 'w-6 h-6 rounded-full cursor-pointer border-none p-0 overflow-hidden';
-        input.addEventListener('input', e => {
-          state.customPalette[idx] = e.target.value;
-          triggerGenerate();
+            const input = document.createElement('input');
+            input.type = 'color';
+            input.value = color;
+            input.className = 'w-6 h-6 rounded-full cursor-pointer border-none p-0 overflow-hidden';
+            input.addEventListener('input', e => {
+                state.customPalette[idx] = e.target.value;
+                triggerGenerate();
+            });
+
+            const del = document.createElement('button');
+            del.innerHTML = '×';
+            del.className = 'absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white text-[8px] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition';
+            del.addEventListener('click', () => {
+                state.customPalette.splice(idx, 1);
+                renderCustomPaletteUI();
+                triggerGenerate();
+            });
+
+            div.appendChild(input);
+            div.appendChild(del);
+            els.customPaletteEditor.insertBefore(div, els.btnAddPaletteColor);
         });
-
-        const del = document.createElement('button');
-        del.innerHTML = '×';
-        del.className = 'absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white text-[8px] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition';
-        del.addEventListener('click', () => {
-          state.customPalette.splice(idx, 1);
-          renderCustomPaletteUI();
-          triggerGenerate();
-        });
-
-        div.appendChild(input);
-        div.appendChild(del);
-        els.customPaletteEditor.insertBefore(div, els.btnAddPaletteColor);
-      });
     }
 
     function setupTabs() {
-      const tabs = ['Image', 'Camera', 'Video', 'Text'];
-      tabs.forEach(t => {
-        const btn = document.getElementById(`tab${t}`);
-        btn.addEventListener('click', () => {
-          tabs.forEach(x => {
-            document.getElementById(`tab${x}`).className = 'btn btn-secondary text-[10px] px-1 py-2';
-            document.getElementById(`panel${x}`).classList.add('hidden');
-          });
-          btn.className = 'btn btn-primary text-[10px] px-1 py-2';
-          document.getElementById(`panel${t}`).classList.remove('hidden');
+        const tabs = ['Image', 'Camera', 'Video', 'Text'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`tab${t}`);
+            btn.addEventListener('click', () => {
+                tabs.forEach(x => {
+                    document.getElementById(`tab${x}`).className = 'btn btn-secondary text-[10px] px-1 py-2';
+                    document.getElementById(`panel${x}`).classList.add('hidden');
+                });
+                btn.className = 'btn btn-primary text-[10px] px-1 py-2';
+                document.getElementById(`panel${t}`).classList.remove('hidden');
 
-          stopMedia();
-          state.source = t.toLowerCase();
+                stopMedia();
+                state.source = t.toLowerCase();
 
-          if (state.source === 'image') {
-            currentImage = lastLoadedImage;
-            if (currentImage) triggerGenerate();
-          } else if (state.source === 'video') {
-            currentImage = els.uploadedVideo;
-            if (currentImage.readyState >= 2) triggerGenerate();
-          } else if (state.source === 'camera') {
-            currentImage = els.webcamVideo;
-          } else if (state.source === 'text') {
-            triggerGenerate();
-          }
+                if (state.source === 'image') {
+                    currentImage = lastLoadedImage;
+                    if (currentImage) triggerGenerate();
+                } else if (state.source === 'video') {
+                    currentImage = els.uploadedVideo;
+                    if (currentImage.readyState >= 2) triggerGenerate();
+                } else if (state.source === 'camera') {
+                    currentImage = els.webcamVideo;
+                } else if (state.source === 'text') {
+                    triggerGenerate();
+                }
+            });
         });
-      });
     }
 
     function handleFile(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-          lastLoadedImage = img;
-          currentImage = img;
-          triggerGenerate();
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                lastLoadedImage = img;
+                currentImage = img;
+                triggerGenerate();
+            };
+            img.src = e.target.result;
         };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
     }
 
     function handleVideoFile(file) {
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      els.uploadedVideo.src = url;
-      document.getElementById('videoControls').classList.remove('hidden');
-      currentImage = els.uploadedVideo;
-      els.uploadedVideo.play();
-      processFrame();
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        els.uploadedVideo.src = url;
+        document.getElementById('videoControls').classList.remove('hidden');
+        currentImage = els.uploadedVideo;
+        els.uploadedVideo.play();
+        processFrame();
     }
 
     async function toggleCamera() {
-      if (rafId) {
-        stopMedia();
-        document.getElementById('btnToggleCam').textContent = 'Start Camera';
-        document.getElementById('camPlaceholder').classList.remove('hidden');
-        return;
-      }
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-        els.webcamVideo.srcObject = stream;
-        currentImage = els.webcamVideo;
-        rafId = true;
-        document.getElementById('btnToggleCam').textContent = 'Stop Camera';
-        document.getElementById('camPlaceholder').classList.add('hidden');
-        processFrame();
-      } catch (e) {
-        showToast('Camera access denied', 'error');
-      }
+        if (rafId) {
+            stopMedia();
+            document.getElementById('btnToggleCam').textContent = 'Start Camera';
+            document.getElementById('camPlaceholder').classList.remove('hidden');
+            return;
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+            els.webcamVideo.srcObject = stream;
+            currentImage = els.webcamVideo;
+            rafId = true;
+            document.getElementById('btnToggleCam').textContent = 'Stop Camera';
+            document.getElementById('camPlaceholder').classList.add('hidden');
+            processFrame();
+        } catch (e) {
+            showToast('Camera access denied', 'error');
+        }
     }
 
     function stopMedia() {
-      if (els.webcamVideo.srcObject) {
-        els.webcamVideo.srcObject.getTracks().forEach(t => t.stop());
-        els.webcamVideo.srcObject = null;
-      }
-      if (els.uploadedVideo.src) {
-        els.uploadedVideo.pause();
-      }
-      rafId = null;
+        if (els.webcamVideo.srcObject) {
+            els.webcamVideo.srcObject.getTracks().forEach(t => t.stop());
+            els.webcamVideo.srcObject = null;
+        }
+        if (els.uploadedVideo.src) {
+            els.uploadedVideo.pause();
+        }
+        rafId = null;
     }
 
     function triggerGenerate() {
-      if (state.source === 'text' || currentImage) processFrame();
+        if (state.source === 'text' || currentImage) processFrame();
     }
 
     function processFrame() {
-      if (isGenerating) return;
+        if (isGenerating) return;
 
-      // Prepare Image Data
-      const offCanvas = document.createElement('canvas');
-      const ctx = offCanvas.getContext('2d');
-      let w, h;
+        // Prepare Image Data
+        const offCanvas = document.createElement('canvas');
+        const ctx = offCanvas.getContext('2d');
+        let w, h;
 
-      if (state.source === 'text') {
-        // Render text to canvas
-        ctx.font = `${state.fontSize}px "${state.fontFamily}"`;
-        const lines = document.getElementById('inpText').value.split('\n');
-        const lh = state.fontSize * 1.2;
-        const mw = lines.reduce((max, l) => Math.max(max, ctx.measureText(l).width), 0);
-        w = Math.max(200, mw + 40);
-        h = Math.max(100, (lines.length * lh) + 40);
-        offCanvas.width = w; offCanvas.height = h;
-        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#000'; ctx.font = `${state.fontSize}px "${state.fontFamily}"`; ctx.textBaseline = 'top';
-        lines.forEach((l, i) => ctx.fillText(l, 20, 20 + i * lh));
-      } else {
-        if (!currentImage) return;
-        w = currentImage.videoWidth || currentImage.width;
-        h = currentImage.videoHeight || currentImage.height;
-        if (!w || !h) { requestAnimationFrame(processFrame); return; }
-        offCanvas.width = w; offCanvas.height = h;
-        ctx.drawImage(currentImage, 0, 0, w, h);
-      }
-
-      const imageData = ctx.getImageData(0, 0, w, h);
-      const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
-
-      isGenerating = true;
-      worker.postMessage({
-        imageData: imageData.data,
-        width: w,
-        height: h,
-        options: {
-          resolution: state.resolution,
-          chars: chars || charSets.standard,
-          invert: state.invert,
-          contrast: state.contrast,
-          brightness: state.brightness,
-          saturation: state.saturation,
-          sepia: state.sepia,
-          hue: state.hue,
-          theme: state.theme,
-          customThemeColor: state.customThemeColor,
-          palette: state.palette,
-          customPalette: state.customPalette
+        if (state.source === 'text') {
+            // Render text to canvas
+            ctx.font = `${state.fontSize}px "${state.fontFamily}"`;
+            const lines = document.getElementById('inpText').value.split('\n');
+            const lh = state.fontSize * 1.2;
+            const mw = lines.reduce((max, l) => Math.max(max, ctx.measureText(l).width), 0);
+            w = Math.max(200, mw + 40);
+            h = Math.max(100, (lines.length * lh) + 40);
+            offCanvas.width = w; offCanvas.height = h;
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = '#000'; ctx.font = `${state.fontSize}px "${state.fontFamily}"`; ctx.textBaseline = 'top';
+            lines.forEach((l, i) => ctx.fillText(l, 20, 20 + i * lh));
+        } else {
+            if (!currentImage) return;
+            w = currentImage.videoWidth || currentImage.width;
+            h = currentImage.videoHeight || currentImage.height;
+            if (!w || !h) { requestAnimationFrame(processFrame); return; }
+            offCanvas.width = w; offCanvas.height = h;
+            ctx.drawImage(currentImage, 0, 0, w, h);
         }
-      });
+
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
+
+        isGenerating = true;
+        worker.postMessage({
+            imageData: imageData.data,
+            width: w,
+            height: h,
+            options: {
+                resolution: state.resolution,
+                chars: chars || charSets.standard,
+                invert: state.invert,
+                contrast: state.contrast,
+                brightness: state.brightness,
+                saturation: state.saturation,
+                sepia: state.sepia,
+                hue: state.hue,
+                theme: state.theme,
+                customThemeColor: state.customThemeColor,
+                palette: state.palette,
+                customPalette: state.customPalette
+            }
+        });
     }
 
     function renderCanvas(buffer, cols, rows) {
-      // Setup Canvas
-      const charW = 8; // Approx width of char at 10px font
-      const charH = 12; // Approx height
-      const width = cols * charW;
-      const height = rows * charH;
+        // Setup Canvas
+        const charW = 8; // Approx width of char at 10px font
+        const charH = 12; // Approx height
+        const width = cols * charW;
+        const height = rows * charH;
 
-      if (els.outputCanvas.width !== width || els.outputCanvas.height !== height) {
-        els.outputCanvas.width = width;
-        els.outputCanvas.height = height;
-      }
+        if (els.outputCanvas.width !== width || els.outputCanvas.height !== height) {
+            els.outputCanvas.width = width;
+            els.outputCanvas.height = height;
+        }
 
-      const ctx = canvasCtx;
-      const isDark = document.body.getAttribute('data-theme') !== 'light';
+        const ctx = canvasCtx;
+        const isDark = document.body.getAttribute('data-theme') !== 'light';
 
-      // Clear
-      ctx.fillStyle = isDark ? '#09090b' : '#ffffff';
-      ctx.fillRect(0, 0, width, height);
+        // Clear
+        ctx.fillStyle = isDark ? '#09090b' : '#ffffff';
+        ctx.fillRect(0, 0, width, height);
 
-      // Font
-      ctx.font = '10px "JetBrains Mono", monospace';
-      ctx.textBaseline = 'top';
+        // Font
+        ctx.font = '10px "' + state.outputFont + '", monospace';
+        ctx.textBaseline = 'top';
 
-      const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
-      const charList = (chars || charSets.standard).split('');
+        const chars = state.charSet === 'custom' ? state.customChars : charSets[state.charSet];
+        const charList = (chars || charSets.standard).split('');
 
-      for (let i = 0; i < buffer.length; i++) {
-        const packed = buffer[i];
-        const charIdx = packed & 0xFF;
-        const r = (packed >> 8) & 0xFF;
-        const g = (packed >> 16) & 0xFF;
-        const b = (packed >> 24) & 0xFF;
+        for (let i = 0; i < buffer.length; i++) {
+            const packed = buffer[i];
+            const charIdx = packed & 0xFF;
+            const r = (packed >> 8) & 0xFF;
+            const g = (packed >> 16) & 0xFF;
+            const b = (packed >> 24) & 0xFF;
 
-        const x = (i % cols) * charW;
-        const y = Math.floor(i / cols) * charH;
+            const x = (i % cols) * charW;
+            const y = Math.floor(i / cols) * charH;
 
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillText(charList[charIdx] || ' ', x, y);
-      }
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            ctx.fillText(charList[charIdx] || ' ', x, y);
+        }
     }
 
     function updateZoom() {
-      document.getElementById('zoomVal').textContent = Math.round(state.zoom * 100) + '%';
-      els.outputWrapper.style.transform = `scale(${state.zoom})`;
+        document.getElementById('zoomVal').textContent = Math.round(state.zoom * 100) + '%';
+        els.outputWrapper.style.transform = `scale(${state.zoom})`;
     }
 
     function showToast(msg, type = 'success') {
-      const t = els.toast;
-      t.textContent = msg;
-      t.className = `toast show ${type}`;
-      setTimeout(() => t.classList.remove('show'), 3000);
+        const t = els.toast;
+        t.textContent = msg;
+        t.className = `toast show ${type}`;
+        setTimeout(() => t.classList.remove('show'), 3000);
     }
 
     // Init
     init();
-  </script>
+</script>
 </body>
 
 </html>
